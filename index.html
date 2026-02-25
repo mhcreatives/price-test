@@ -695,9 +695,9 @@
         }
         
         function calculateShippingFee(totalAmount) {
-            if (totalAmount >= 3000) {
+            if (totalAmount >= 6000) {
                 return 0; // FREE shipping
-            } else if (totalAmount >= 2000) {
+            } else if (totalAmount >= 3000) {
                 return 50; // ₱50 shipping
             } else {
                 return 100; // ₱100 shipping
