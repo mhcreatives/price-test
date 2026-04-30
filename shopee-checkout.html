@@ -7,224 +7,398 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f7f7f7;color:#333;line-height:1.6}
-    header{background:#ee4d2d;color:#fff;padding:18px 32px;display:flex;align-items:center;gap:14px}
-    header h1{font-size:1.4rem;font-weight:600}
-    header span.badge{background:rgba(255,255,255,.25);padding:2px 10px;border-radius:20px;font-size:12px}
-    .container{max-width:860px;margin:0 auto;padding:32px 20px}
-    .card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:28px;margin-bottom:24px}
-    h2{font-size:1.1rem;font-weight:600;margin-bottom:16px;color:#ee4d2d;display:flex;align-items:center;gap:8px}
-    .step{display:flex;gap:18px;margin-bottom:20px;align-items:flex-start}
-    .step-num{background:#ee4d2d;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:2px}
-    .step-body h3{font-size:1rem;margin-bottom:4px}
-    .step-body p{font-size:.9rem;color:#555}
-    a.btn{display:inline-block;background:#ee4d2d;color:#fff;padding:10px 22px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.95rem;margin-top:8px}
-    a.btn:hover{background:#d43f1f}
-    .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media(max-width:600px){.feature-grid{grid-template-columns:1fr}}
-    .feature{border:1px solid #f0f0f0;border-radius:8px;padding:14px}
-    .feature h3{font-size:.95rem;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-    .feature p{font-size:.85rem;color:#666}
-    .tag{display:inline-block;background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
-    .code-block{background:#2d2d2d;color:#f8f8f2;border-radius:8px;padding:16px;font-family:monospace;font-size:.85rem;overflow-x:auto;margin-top:10px}
-    .code-block .c{color:#75715e}
-    .faq dt{font-weight:600;margin-top:14px;cursor:pointer}
-    .faq dd{font-size:.9rem;color:#555;margin-left:0;margin-top:4px;padding-left:12px;border-left:3px solid #ee4d2d}
-    .warning{background:#fff3e0;border-left:4px solid #ff9800;padding:12px 16px;border-radius:4px;font-size:.9rem;color:#7c4700}
-    .success{background:#e8f5e9;border-left:4px solid #4caf50;padding:12px 16px;border-radius:4px;font-size:.9rem;color:#1b5e20}
-    footer{text-align:center;color:#aaa;font-size:.8rem;padding:24px}
+    header{background:#ee4d2d;color:#fff;padding:18px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    header h1{font-size:1.3rem;font-weight:600}
+    header p{font-size:.82rem;opacity:.85}
+    .badge{background:rgba(255,255,255,.25);padding:2px 10px;border-radius:20px;font-size:11px;white-space:nowrap}
+    .container{max-width:820px;margin:0 auto;padding:20px 16px}
+
+    /* Device tabs */
+    .device-tabs{display:flex;gap:8px;margin-bottom:20px}
+    .tab-btn{flex:1;padding:12px 6px;border:2px solid #e0e0e0;background:#fff;border-radius:10px;
+      cursor:pointer;font-size:.9rem;font-weight:600;color:#777;text-align:center;transition:.15s;
+      -webkit-tap-highlight-color:transparent}
+    .tab-btn.active{border-color:#ee4d2d;color:#ee4d2d;background:#fff8f7}
+    .tab-btn span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .tab-pane{display:none}
+    .tab-pane.active{display:block}
+
+    /* Cards */
+    .card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:20px;margin-bottom:18px}
+    h2{font-size:1rem;font-weight:700;margin-bottom:14px;color:#ee4d2d;display:flex;align-items:center;gap:8px}
+    .step{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start}
+    .step-num{background:#ee4d2d;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;
+      align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:3px}
+    .step-body h3{font-size:.95rem;margin-bottom:3px}
+    .step-body p{font-size:.88rem;color:#555}
+    a.btn,button.btn{display:inline-block;background:#ee4d2d;color:#fff;padding:10px 20px;border-radius:8px;
+      text-decoration:none;font-weight:600;font-size:.9rem;margin-top:8px;border:none;cursor:pointer;
+      -webkit-tap-highlight-color:transparent}
+    a.btn:active,button.btn:active{background:#d43f1f}
+    a.btn.secondary{background:#fff;color:#ee4d2d;border:2px solid #ee4d2d}
+
+    /* Bookmarklet box */
+    .bm-box{background:#fff8f7;border:2px dashed #ee4d2d;border-radius:10px;padding:16px;margin-top:10px;text-align:center}
+    .bm-box p{font-size:.82rem;color:#777;margin-bottom:10px}
+    #bm-link{display:inline-block;background:#ee4d2d;color:#fff;padding:12px 24px;border-radius:8px;
+      text-decoration:none;font-weight:700;font-size:1rem;cursor:grab}
+    .bm-tip{margin-top:10px;font-size:.8rem;color:#999}
+
+    /* Copy box */
+    .copy-wrap{position:relative;margin-top:8px}
+    .copy-wrap textarea{width:100%;height:80px;padding:10px;border:1px solid #ddd;border-radius:8px;
+      font-family:monospace;font-size:.78rem;resize:none;background:#f9f9f9}
+    .copy-btn{position:absolute;top:8px;right:8px;background:#ee4d2d;color:#fff;border:none;
+      border-radius:5px;padding:4px 10px;font-size:.78rem;cursor:pointer}
+
+    /* Warnings & notes */
+    .note{background:#e3f2fd;border-left:4px solid #1976d2;padding:10px 14px;border-radius:4px;font-size:.87rem;color:#0d3c6e;margin-top:10px}
+    .warn{background:#fff3e0;border-left:4px solid #ff9800;padding:10px 14px;border-radius:4px;font-size:.87rem;color:#7c4700;margin-top:10px}
+    .success{background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 14px;border-radius:4px;font-size:.87rem;color:#1b5e20;margin-top:10px}
+
+    /* Feature grid */
+    .feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:520px){.feat-grid{grid-template-columns:1fr}}
+    .feat{border:1px solid #f0f0f0;border-radius:8px;padding:12px}
+    .feat h3{font-size:.9rem;margin-bottom:3px}
+    .feat p{font-size:.82rem;color:#666}
+
+    /* Config table */
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    th{text-align:left;padding:9px;background:#f5f5f5;border-bottom:1px solid #e0e0e0;font-weight:600}
+    td{padding:9px;border-bottom:1px solid #f5f5f5}
+    code{background:#f0f0f0;padding:1px 5px;border-radius:4px;font-size:.85rem}
+
+    /* FAQ */
+    .faq dt{font-weight:600;margin-top:12px;cursor:pointer;font-size:.92rem}
+    .faq dd{font-size:.86rem;color:#555;margin-left:0;margin-top:3px;padding-left:12px;border-left:3px solid #ee4d2d}
+
+    footer{text-align:center;color:#bbb;font-size:.78rem;padding:24px}
+    hr.div{border:none;border-top:1px solid #f0f0f0;margin:12px 0}
   </style>
 </head>
 <body>
 
 <header>
-  <span style="font-size:2rem">🛒</span>
-  <div>
+  <span style="font-size:2.2rem">🛒</span>
+  <div style="flex:1">
     <h1>Shopee Checkout Automator</h1>
-    <p style="font-size:.85rem;opacity:.85">Automated address, payment &amp; order placement for Shopee PH</p>
+    <p>Address · Payment · Voucher · Auto-place order</p>
   </div>
   <span class="badge">v1.0</span>
 </header>
 
 <div class="container">
 
-  <!-- Quick start -->
-  <div class="card">
-    <h2>⚡ Quick Start (3 steps)</h2>
+  <!-- Device selector -->
+  <div class="device-tabs">
+    <button class="tab-btn active" onclick="switchTab('android')">
+      <span>🤖</span>Android Tablet
+    </button>
+    <button class="tab-btn" onclick="switchTab('ipad')">
+      <span>🍎</span>iPad
+    </button>
+    <button class="tab-btn" onclick="switchTab('desktop')">
+      <span>💻</span>Desktop / PC
+    </button>
+  </div>
 
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <h3>Install Tampermonkey</h3>
-        <p>Tampermonkey is a free browser extension that lets you run custom scripts on websites. Install it for your browser:</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+  <!-- ─── ANDROID ─────────────────────────────────────────────────────────── -->
+  <div class="tab-pane active" id="tab-android">
+
+    <div class="card">
+      <h2>📱 Android Tablet — Recommended Method</h2>
+      <p style="margin-bottom:14px;font-size:.88rem;color:#555">
+        Install <strong>Firefox for Android</strong> (free on Play Store), then add Tampermonkey.
+        This is the easiest and most reliable method.
+      </p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Install Firefox for Android</h3>
+          <p>Open the Google Play Store and install <strong>Firefox</strong> (free).</p>
+          <div class="note">Firefox on Android supports real browser extensions — unlike Chrome for Android.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Install Tampermonkey in Firefox</h3>
+          <p>In Firefox, open the menu → <em>Add-ons</em> → search for <strong>Tampermonkey</strong> → Install.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Install the Automation Script</h3>
+          <p>Tap the button below to open the script file. Tampermonkey will prompt you to install it.</p>
+          <a class="btn" href="shopee-checkout.user.js" target="_blank">📜 Install Script</a>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Go to Shopee Checkout</h3>
+          <p>Add items to cart, go to checkout — the <strong>automation panel</strong> appears at the bottom of the screen automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔖 Alternative: Bookmarklet (any Android browser)</h2>
+      <p style="margin-bottom:10px;font-size:.88rem;color:#555">
+        Works in Chrome, Samsung Internet, or any browser — no extensions needed.
+        Save it as a bookmark, then tap it on the Shopee checkout page.
+      </p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Add the bookmarklet to your browser</h3>
+          <p>Tap <strong>Copy</strong> below, then:</p>
+          <ol style="padding-left:18px;margin-top:6px;font-size:.87rem;color:#555;line-height:2">
+            <li>Open any website in your browser</li>
+            <li>Bookmark that page (Star icon)</li>
+            <li>Go to Bookmarks, find the one you just saved, tap <em>Edit</em></li>
+            <li>Delete the URL and paste the copied code</li>
+            <li>Save — name it <strong>Shopee Auto</strong></li>
+          </ol>
+          <div class="copy-wrap" style="margin-top:10px">
+            <textarea id="bm-code" readonly></textarea>
+            <button class="copy-btn" onclick="copyBM()">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Use it on checkout</h3>
+          <p>Go to <code>shopee.ph/checkout</code>, open your bookmarks, and tap <strong>Shopee Auto</strong>. The panel will appear.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── IPAD ─────────────────────────────────────────────────────────────── -->
+  <div class="tab-pane" id="tab-ipad">
+
+    <div class="card">
+      <h2>🍎 iPad — Recommended Method (Safari)</h2>
+      <p style="margin-bottom:14px;font-size:.88rem;color:#555">
+        Install the free <strong>UserScripts</strong> Safari extension from the App Store,
+        then add the script to it.
+      </p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Install UserScripts from App Store</h3>
+          <p>Search for <strong>"UserScripts"</strong> by Justin Wasack on the App Store (free).</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Enable it in Safari Settings</h3>
+          <p>Go to <strong>Settings → Safari → Extensions</strong> → enable <em>UserScripts</em>. Grant access to <code>shopee.ph</code>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Add the script</h3>
+          <p>Tap the script button below to open the <code>.user.js</code> file. UserScripts will offer to install it automatically.</p>
+          <a class="btn" href="shopee-checkout.user.js" target="_blank">📜 Install Script</a>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Go to Shopee Checkout</h3>
+          <p>Proceed to checkout on Shopee — the automation panel appears in the corner.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔖 Alternative: Bookmarklet (no app needed)</h2>
+      <p style="margin-bottom:10px;font-size:.88rem;color:#555">
+        Copy the code below, then create a Safari bookmark with it as the URL.
+      </p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Create the bookmarklet</h3>
+          <ol style="padding-left:18px;margin-top:6px;font-size:.87rem;color:#555;line-height:2">
+            <li>Tap <strong>Copy</strong> below</li>
+            <li>In Safari, bookmark any page (Share → Add Bookmark)</li>
+            <li>Open <em>Bookmarks</em>, tap <em>Edit</em> on the new bookmark</li>
+            <li>Replace the URL with the copied code</li>
+            <li>Save — name it <strong>Shopee Auto</strong></li>
+          </ol>
+          <div class="copy-wrap" style="margin-top:10px">
+            <textarea id="bm-code-ipad" readonly></textarea>
+            <button class="copy-btn" onclick="copyBM('ipad')">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Tap it on checkout</h3>
+          <p>Go to Shopee checkout in Safari, open Bookmarks, tap <strong>Shopee Auto</strong>.</p>
+          <div class="warn">Safari may ask "Are you sure you want to run a script?" — tap <em>Run</em> to confirm.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── DESKTOP ──────────────────────────────────────────────────────────── -->
+  <div class="tab-pane" id="tab-desktop">
+    <div class="card">
+      <h2>💻 Desktop / PC</h2>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Install Tampermonkey</h3>
+          <p>Available for Chrome, Firefox, Edge, Safari, and Opera.</p>
           <a class="btn" href="https://www.tampermonkey.net/" target="_blank">Get Tampermonkey</a>
         </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <h3>Install the Script</h3>
-        <p>Open the script file below in Tampermonkey to install it. Tampermonkey will prompt you to confirm.</p>
-        <a class="btn" href="shopee-checkout.user.js" target="_blank">📜 Install Script</a>
-        <p style="margin-top:6px;font-size:.82rem;color:#888">
-          Or open Tampermonkey → Dashboard → New Script, paste the contents of
-          <code>shopee-checkout.user.js</code>, and save.
-        </p>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Install the Script</h3>
+          <a class="btn" href="shopee-checkout.user.js" target="_blank">📜 Install Script</a>
+          <p style="margin-top:6px;font-size:.82rem;color:#888">Tampermonkey will prompt you to confirm the installation.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <h3>Go to Shopee Checkout</h3>
-        <p>Add items to your cart, proceed to checkout, and the <strong>automation panel</strong> will appear in the bottom-right corner of the page automatically.</p>
-        <div class="success" style="margin-top:8px">
-          Configure your preferences in the panel and click <strong>▶ Run Automation</strong>.
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Go to Shopee Checkout</h3>
+          <p>The automation panel appears at the bottom-right of the checkout page automatically.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Features -->
+  <!-- ─── Shared sections ──────────────────────────────────────────────────── -->
   <div class="card">
     <h2>✨ Features</h2>
-    <div class="feature-grid">
-      <div class="feature">
-        <h3>📍 Address Selection</h3>
-        <p>Auto-selects your preferred shipping address by matching a keyword (e.g. "Makati", "Home", your street name).</p>
-      </div>
-      <div class="feature">
-        <h3>💳 Payment Method</h3>
-        <p>Automatically picks your preferred payment — GCash, ShopeePay, COD, credit card, or any listed option.</p>
-      </div>
-      <div class="feature">
-        <h3>🏷️ Voucher / Promo Code</h3>
-        <p>Enters and applies a voucher or promo code automatically before checkout.</p>
-      </div>
-      <div class="feature">
-        <h3>⏱️ Auto Place Order <span class="tag">Optional</span></h3>
-        <p>Places the order after a configurable countdown (0–30 s). Useful for flash sales — disable it to review manually.</p>
-      </div>
+    <div class="feat-grid">
+      <div class="feat"><h3>📍 Auto Address</h3><p>Picks your preferred delivery address by keyword.</p></div>
+      <div class="feat"><h3>💳 Auto Payment</h3><p>Selects GCash, ShopeePay, COD, or any method by name.</p></div>
+      <div class="feat"><h3>🏷️ Auto Voucher</h3><p>Enters and applies your promo/voucher code.</p></div>
+      <div class="feat"><h3>⏱️ Auto Place Order</h3><p>Places order after a 0–30 s countdown. Great for flash sales.</p></div>
     </div>
   </div>
 
-  <!-- Panel screenshot / mockup -->
   <div class="card">
-    <h2>🖥️ The Automation Panel</h2>
-    <p style="margin-bottom:14px;font-size:.9rem;color:#555">
-      When you visit the Shopee checkout page, a floating panel appears in the bottom-right corner:
-    </p>
-    <div style="background:#f7f7f7;border:1px solid #e0e0e0;border-radius:10px;padding:20px;max-width:340px">
-      <div style="background:#ee4d2d;color:#fff;padding:10px 14px;border-radius:6px 6px 0 0;font-weight:600">
-        🛒 Shopee Auto Checkout ▲
-      </div>
-      <div style="background:#fff;border:1px solid #e0e0e0;border-radius:0 0 6px 6px;padding:14px;font-size:13px">
-        <p style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Shipping Address</p>
-        <label style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <input type="checkbox" checked> Auto-select address
-        </label>
-        <input type="text" placeholder='Address keyword (e.g. "Makati")' style="width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;margin-bottom:10px">
-
-        <p style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Payment Method</p>
-        <label style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <input type="checkbox" checked> Auto-select payment
-        </label>
-        <input type="text" placeholder='Payment keyword (e.g. "GCash", "COD")' style="width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;margin-bottom:10px">
-
-        <button style="width:100%;padding:9px;background:#ee4d2d;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer">
-          ▶ Run Automation
-        </button>
-        <div style="margin-top:8px;padding:6px 8px;background:#f5f5f5;border-radius:6px;font-size:12px;color:#555">
-          Ready. Configure options above and click Run.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Configuration reference -->
-  <div class="card">
-    <h2>⚙️ Configuration Reference</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:.9rem">
-      <thead>
-        <tr style="background:#f5f5f5">
-          <th style="text-align:left;padding:10px;border-bottom:1px solid #e0e0e0">Setting</th>
-          <th style="text-align:left;padding:10px;border-bottom:1px solid #e0e0e0">Description</th>
-          <th style="text-align:left;padding:10px;border-bottom:1px solid #e0e0e0">Example</th>
-        </tr>
-      </thead>
+    <h2>⚙️ Configuration</h2>
+    <table>
+      <thead><tr><th>Setting</th><th>Description</th><th>Example</th></tr></thead>
       <tbody>
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Address keyword</code></td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Partial text that appears in your preferred address</td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Makati</code>, <code>123 Main</code></td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Payment keyword</code></td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Name of payment method to select</td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>GCash</code>, <code>COD</code>, <code>ShopeePay</code></td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Voucher code</code></td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Promo or voucher code to apply</td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>SAVE50</code>, <code>FREESHIP</code></td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Countdown</code></td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Seconds to wait before auto-placing the order (0 = instant)</td>
-          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>5</code> seconds</td>
-        </tr>
+        <tr><td><code>Address keyword</code></td><td>Partial text in your saved address</td><td><code>Makati</code>, <code>Home</code></td></tr>
+        <tr><td><code>Payment keyword</code></td><td>Name of your preferred payment</td><td><code>GCash</code>, <code>COD</code></td></tr>
+        <tr><td><code>Voucher code</code></td><td>Promo or discount code</td><td><code>SAVE50</code></td></tr>
+        <tr><td><code>Countdown</code></td><td>Seconds before auto-placing order</td><td><code>5</code></td></tr>
       </tbody>
     </table>
-    <p style="margin-top:12px;font-size:.85rem;color:#888">
-      All settings are saved in your browser automatically — you only need to configure once.
-    </p>
+    <p style="margin-top:10px;font-size:.82rem;color:#888">Settings are saved in your browser — configure once, works every time.</p>
   </div>
 
-  <!-- Flash sale tip -->
   <div class="card">
     <h2>🔥 Flash Sale Tips</h2>
-    <p style="margin-bottom:12px;font-size:.9rem;color:#555">
-      To maximize your chances during a Shopee flash sale:
-    </p>
-    <ol style="padding-left:20px;font-size:.9rem;color:#555;line-height:2">
-      <li>Add items to cart <strong>before</strong> the sale starts.</li>
-      <li>Open the checkout page and let the script pre-fill address &amp; payment.</li>
-      <li>Enable <strong>Auto-place order</strong> with a countdown of <strong>0–3 seconds</strong>.</li>
-      <li>Click <strong>▶ Run</strong> a few seconds before the sale starts — the countdown will fire exactly when you set it.</li>
-      <li>Keep the tab focused and your internet stable.</li>
+    <ol style="padding-left:18px;font-size:.88rem;color:#555;line-height:2.1">
+      <li>Add items to cart <strong>before</strong> the sale starts</li>
+      <li>Open checkout and configure address + payment in the panel</li>
+      <li>Enable <strong>Auto-place order</strong> with a <strong>0–3 s countdown</strong></li>
+      <li>Tap <strong>▶ Run</strong> a few seconds before the sale — the countdown fires at exactly the right moment</li>
+      <li>Keep the screen awake and your internet connection stable</li>
     </ol>
-    <div class="warning" style="margin-top:14px">
-      <strong>Note:</strong> Shopee may update its page structure. If a step fails, check the browser console
-      (F12 → Console) for <code>[Shopee Auto]</code> messages to diagnose the issue.
-    </div>
   </div>
 
-  <!-- FAQ -->
   <div class="card">
     <h2>❓ FAQ</h2>
     <dl class="faq">
-      <dt>Does this work on shopee.ph?</dt>
-      <dd>Yes. The script is configured for <code>shopee.ph</code>. You can edit the <code>@match</code> lines in the script header to support other regional Shopee domains (e.g. <code>shopee.sg</code>, <code>shopee.com.my</code>).</dd>
-
+      <dt>The panel doesn't appear.</dt>
+      <dd>Make sure the extension/userscript is enabled. Refresh the checkout page after your cart is fully loaded.</dd>
+      <dt>A step says "not found".</dt>
+      <dd>Shopee sometimes updates its page layout. Try running again; if it keeps failing, the CSS selectors in the script may need updating.</dd>
+      <dt>Can I skip a step?</dt>
+      <dd>Yes — each feature has its own toggle. Turn off the ones you don't need.</dd>
       <dt>Is my data safe?</dt>
-      <dd>All settings are stored locally in your browser via Tampermonkey's storage — nothing is sent externally. The script only runs on Shopee checkout pages.</dd>
-
-      <dt>The automation panel doesn't appear.</dt>
-      <dd>Make sure Tampermonkey is enabled and the script is active (green dot in the Tampermonkey icon). Try refreshing the checkout page after the cart is loaded.</dd>
-
-      <dt>A step says "not found" in the console.</dt>
-      <dd>Shopee occasionally changes its HTML structure. Open an issue or update the CSS selectors in the script to match the current page layout.</dd>
-
-      <dt>Can I disable just one step?</dt>
-      <dd>Yes — each feature has its own toggle. Uncheck the ones you don't need.</dd>
+      <dd>All settings are stored locally in your browser. Nothing is sent anywhere outside Shopee.</dd>
     </dl>
   </div>
 
 </div>
 
-<footer>Shopee Checkout Automator · Built for personal use · Not affiliated with Shopee</footer>
+<footer>Shopee Checkout Automator · Personal use only · Not affiliated with Shopee</footer>
 
+<script>
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['android','ipad','desktop'][i] === name);
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+  }
+
+  // ── Bookmarklet generation ─────────────────────────────────────────────────
+  // Load the tablet script and generate the javascript: URL
+  async function loadBookmarklet() {
+    try {
+      const res = await fetch('shopee-checkout-tablet.js');
+      const src = await res.text();
+      // Minify slightly: remove single-line comments and collapse whitespace
+      const min = src
+        .replace(/\/\/[^\n]*/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const url = 'javascript:' + encodeURIComponent('(function(){' + min + '})();');
+      document.getElementById('bm-code').value = url;
+      const el2 = document.getElementById('bm-code-ipad');
+      if (el2) el2.value = url;
+    } catch (e) {
+      const fallback = "javascript:alert('Open this page via a local or web server to generate the bookmarklet.');";
+      ['bm-code','bm-code-ipad'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = fallback;
+      });
+    }
+  }
+
+  function copyBM(suffix) {
+    const id = suffix ? 'bm-code-' + suffix : 'bm-code';
+    const ta = document.getElementById(id);
+    if (!ta) return;
+    ta.select();
+    navigator.clipboard ? navigator.clipboard.writeText(ta.value) : document.execCommand('copy');
+    const btn = ta.nextElementSibling;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  }
+
+  loadBookmarklet();
+</script>
 </body>
 </html>
