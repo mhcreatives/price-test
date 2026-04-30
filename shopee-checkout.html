@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee Checkout Automator – Setup</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f7f7f7;color:#333;line-height:1.6}
+    header{background:#ee4d2d;color:#fff;padding:18px 32px;display:flex;align-items:center;gap:14px}
+    header h1{font-size:1.4rem;font-weight:600}
+    header span.badge{background:rgba(255,255,255,.25);padding:2px 10px;border-radius:20px;font-size:12px}
+    .container{max-width:860px;margin:0 auto;padding:32px 20px}
+    .card{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:28px;margin-bottom:24px}
+    h2{font-size:1.1rem;font-weight:600;margin-bottom:16px;color:#ee4d2d;display:flex;align-items:center;gap:8px}
+    .step{display:flex;gap:18px;margin-bottom:20px;align-items:flex-start}
+    .step-num{background:#ee4d2d;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;margin-top:2px}
+    .step-body h3{font-size:1rem;margin-bottom:4px}
+    .step-body p{font-size:.9rem;color:#555}
+    a.btn{display:inline-block;background:#ee4d2d;color:#fff;padding:10px 22px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.95rem;margin-top:8px}
+    a.btn:hover{background:#d43f1f}
+    .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:600px){.feature-grid{grid-template-columns:1fr}}
+    .feature{border:1px solid #f0f0f0;border-radius:8px;padding:14px}
+    .feature h3{font-size:.95rem;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+    .feature p{font-size:.85rem;color:#666}
+    .tag{display:inline-block;background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+    .code-block{background:#2d2d2d;color:#f8f8f2;border-radius:8px;padding:16px;font-family:monospace;font-size:.85rem;overflow-x:auto;margin-top:10px}
+    .code-block .c{color:#75715e}
+    .faq dt{font-weight:600;margin-top:14px;cursor:pointer}
+    .faq dd{font-size:.9rem;color:#555;margin-left:0;margin-top:4px;padding-left:12px;border-left:3px solid #ee4d2d}
+    .warning{background:#fff3e0;border-left:4px solid #ff9800;padding:12px 16px;border-radius:4px;font-size:.9rem;color:#7c4700}
+    .success{background:#e8f5e9;border-left:4px solid #4caf50;padding:12px 16px;border-radius:4px;font-size:.9rem;color:#1b5e20}
+    footer{text-align:center;color:#aaa;font-size:.8rem;padding:24px}
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:2rem">🛒</span>
+  <div>
+    <h1>Shopee Checkout Automator</h1>
+    <p style="font-size:.85rem;opacity:.85">Automated address, payment &amp; order placement for Shopee PH</p>
+  </div>
+  <span class="badge">v1.0</span>
+</header>
+
+<div class="container">
+
+  <!-- Quick start -->
+  <div class="card">
+    <h2>⚡ Quick Start (3 steps)</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Install Tampermonkey</h3>
+        <p>Tampermonkey is a free browser extension that lets you run custom scripts on websites. Install it for your browser:</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+          <a class="btn" href="https://www.tampermonkey.net/" target="_blank">Get Tampermonkey</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Install the Script</h3>
+        <p>Open the script file below in Tampermonkey to install it. Tampermonkey will prompt you to confirm.</p>
+        <a class="btn" href="shopee-checkout.user.js" target="_blank">📜 Install Script</a>
+        <p style="margin-top:6px;font-size:.82rem;color:#888">
+          Or open Tampermonkey → Dashboard → New Script, paste the contents of
+          <code>shopee-checkout.user.js</code>, and save.
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Go to Shopee Checkout</h3>
+        <p>Add items to your cart, proceed to checkout, and the <strong>automation panel</strong> will appear in the bottom-right corner of the page automatically.</p>
+        <div class="success" style="margin-top:8px">
+          Configure your preferences in the panel and click <strong>▶ Run Automation</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="card">
+    <h2>✨ Features</h2>
+    <div class="feature-grid">
+      <div class="feature">
+        <h3>📍 Address Selection</h3>
+        <p>Auto-selects your preferred shipping address by matching a keyword (e.g. "Makati", "Home", your street name).</p>
+      </div>
+      <div class="feature">
+        <h3>💳 Payment Method</h3>
+        <p>Automatically picks your preferred payment — GCash, ShopeePay, COD, credit card, or any listed option.</p>
+      </div>
+      <div class="feature">
+        <h3>🏷️ Voucher / Promo Code</h3>
+        <p>Enters and applies a voucher or promo code automatically before checkout.</p>
+      </div>
+      <div class="feature">
+        <h3>⏱️ Auto Place Order <span class="tag">Optional</span></h3>
+        <p>Places the order after a configurable countdown (0–30 s). Useful for flash sales — disable it to review manually.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel screenshot / mockup -->
+  <div class="card">
+    <h2>🖥️ The Automation Panel</h2>
+    <p style="margin-bottom:14px;font-size:.9rem;color:#555">
+      When you visit the Shopee checkout page, a floating panel appears in the bottom-right corner:
+    </p>
+    <div style="background:#f7f7f7;border:1px solid #e0e0e0;border-radius:10px;padding:20px;max-width:340px">
+      <div style="background:#ee4d2d;color:#fff;padding:10px 14px;border-radius:6px 6px 0 0;font-weight:600">
+        🛒 Shopee Auto Checkout ▲
+      </div>
+      <div style="background:#fff;border:1px solid #e0e0e0;border-radius:0 0 6px 6px;padding:14px;font-size:13px">
+        <p style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Shipping Address</p>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <input type="checkbox" checked> Auto-select address
+        </label>
+        <input type="text" placeholder='Address keyword (e.g. "Makati")' style="width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;margin-bottom:10px">
+
+        <p style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Payment Method</p>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <input type="checkbox" checked> Auto-select payment
+        </label>
+        <input type="text" placeholder='Payment keyword (e.g. "GCash", "COD")' style="width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;margin-bottom:10px">
+
+        <button style="width:100%;padding:9px;background:#ee4d2d;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer">
+          ▶ Run Automation
+        </button>
+        <div style="margin-top:8px;padding:6px 8px;background:#f5f5f5;border-radius:6px;font-size:12px;color:#555">
+          Ready. Configure options above and click Run.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuration reference -->
+  <div class="card">
+    <h2>⚙️ Configuration Reference</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+      <thead>
+        <tr style="background:#f5f5f5">
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e0e0e0">Setting</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e0e0e0">Description</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid #e0e0e0">Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Address keyword</code></td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Partial text that appears in your preferred address</td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Makati</code>, <code>123 Main</code></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Payment keyword</code></td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Name of payment method to select</td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>GCash</code>, <code>COD</code>, <code>ShopeePay</code></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Voucher code</code></td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Promo or voucher code to apply</td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>SAVE50</code>, <code>FREESHIP</code></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>Countdown</code></td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0">Seconds to wait before auto-placing the order (0 = instant)</td>
+          <td style="padding:10px;border-bottom:1px solid #f0f0f0"><code>5</code> seconds</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:.85rem;color:#888">
+      All settings are saved in your browser automatically — you only need to configure once.
+    </p>
+  </div>
+
+  <!-- Flash sale tip -->
+  <div class="card">
+    <h2>🔥 Flash Sale Tips</h2>
+    <p style="margin-bottom:12px;font-size:.9rem;color:#555">
+      To maximize your chances during a Shopee flash sale:
+    </p>
+    <ol style="padding-left:20px;font-size:.9rem;color:#555;line-height:2">
+      <li>Add items to cart <strong>before</strong> the sale starts.</li>
+      <li>Open the checkout page and let the script pre-fill address &amp; payment.</li>
+      <li>Enable <strong>Auto-place order</strong> with a countdown of <strong>0–3 seconds</strong>.</li>
+      <li>Click <strong>▶ Run</strong> a few seconds before the sale starts — the countdown will fire exactly when you set it.</li>
+      <li>Keep the tab focused and your internet stable.</li>
+    </ol>
+    <div class="warning" style="margin-top:14px">
+      <strong>Note:</strong> Shopee may update its page structure. If a step fails, check the browser console
+      (F12 → Console) for <code>[Shopee Auto]</code> messages to diagnose the issue.
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card">
+    <h2>❓ FAQ</h2>
+    <dl class="faq">
+      <dt>Does this work on shopee.ph?</dt>
+      <dd>Yes. The script is configured for <code>shopee.ph</code>. You can edit the <code>@match</code> lines in the script header to support other regional Shopee domains (e.g. <code>shopee.sg</code>, <code>shopee.com.my</code>).</dd>
+
+      <dt>Is my data safe?</dt>
+      <dd>All settings are stored locally in your browser via Tampermonkey's storage — nothing is sent externally. The script only runs on Shopee checkout pages.</dd>
+
+      <dt>The automation panel doesn't appear.</dt>
+      <dd>Make sure Tampermonkey is enabled and the script is active (green dot in the Tampermonkey icon). Try refreshing the checkout page after the cart is loaded.</dd>
+
+      <dt>A step says "not found" in the console.</dt>
+      <dd>Shopee occasionally changes its HTML structure. Open an issue or update the CSS selectors in the script to match the current page layout.</dd>
+
+      <dt>Can I disable just one step?</dt>
+      <dd>Yes — each feature has its own toggle. Uncheck the ones you don't need.</dd>
+    </dl>
+  </div>
+
+</div>
+
+<footer>Shopee Checkout Automator · Built for personal use · Not affiliated with Shopee</footer>
+
+</body>
+</html>
