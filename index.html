@@ -107,6 +107,11 @@
         .notification { position: fixed; top: 20px; right: 20px; background-color: #333333; color: white; padding: 10px 16px; border-radius: 4px; font-size: 0.85rem; opacity: 0; transform: translateY(-10px); transition: opacity 0.3s, transform 0.3s; z-index: 1000; }
         .notification.show { opacity: 1; transform: translateY(0); }
         .section-divider { height: 1px; background-color: #e0e0e0; margin: 20px 0; }
+        /* Mobile floating price bar */
+        .mobile-price-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #333333; color: white; padding: 10px 16px; z-index: 999; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .mobile-price-bar .bar-price { font-size: 1.1rem; font-weight: 600; }
+        .mobile-price-bar .bar-detail { color: #cccccc; font-size: 0.8rem; }
+        @media (max-width: 900px) { .mobile-price-bar { display: flex; } body { padding-bottom: 60px; } }
     </style>
 </head>
 <body>
@@ -339,7 +344,7 @@
                 </div>
                 
                 <div class="input-row">
-                    <div class="input-group"><label class="input-label">Number of Sets</label><input type="number" class="text-input" id="sets-input" min="1" max="1000" value="20"></div>
+                    <div class="input-group"><label class="input-label">Number of Sets</label><input type="number" class="text-input" id="sets-input" min="1" max="1000" value="20" oninput="this.value = Math.max(1, parseInt(this.value) || 1)"></div>
                     <div class="input-group"><label class="input-label">Event Date</label><input type="date" class="date-input" id="event-date-input" value=""></div>
                 </div>
                 <div class="button-row">
@@ -378,6 +383,10 @@
     </div>
     <div class="notification" id="notification">Quotation copied to clipboard!</div>
     <div class="notification" id="price-notification" style="top: 70px;">Price summary copied to clipboard!</div>
+    <div class="mobile-price-bar" id="mobile-price-bar">
+        <div><span class="bar-price" id="mobile-bar-price">₱25 each</span><br><span class="bar-detail" id="mobile-bar-total">Total: ₱500</span></div>
+        <div class="bar-detail" id="mobile-bar-sets">20 sets</div>
+    </div>
     <script>
         const BASE_PRICE = 25;
         const INSERT_PRICE = 5;
@@ -608,8 +617,8 @@
                     ${addon.unit !== 'flat' ? 
                         `<div class="addon-option">
                             <label>${addon.unit === 'page' ? 'Pages' : 'Pieces'}:</label>
-                            <input type="number" class="addon-input" id="qty-${addon.id}" min="1" max="100" value="1" disabled>
-                        </div>` 
+                            <input type="number" class="addon-input" id="qty-${addon.id}" min="1" max="100" value="1" disabled oninput="this.value = Math.max(1, parseInt(this.value) || 1)">
+                        </div>`
                         : ''}
                 `;
                 addonsGrid.appendChild(addonItem);
@@ -695,13 +704,27 @@
         }
         
         function calculateShippingFee(totalAmount) {
+            // Base shipping rates
+            let baseFee = 0;
             if (totalAmount >= 6000) {
-                return 0; // FREE shipping
+                baseFee = 0; // FREE shipping
             } else if (totalAmount >= 3000) {
-                return 50; // ₱50 shipping
+                baseFee = 50; // ₱50 shipping
             } else {
-                return 100; // ₱100 shipping
+                baseFee = 100; // ₱100 shipping
             }
+            
+            // Apply location multiplier
+            const locationMultipliers = {
+                'ncr': 1,
+                'central-luzon': 1,
+                'north-luzon': 1.25,
+                'south-luzon': 1.25,
+                'visayas': 1.5,
+                'mindanao': 1.5
+            };
+            const multiplier = locationMultipliers[currentSelections.location] || 1;
+            return Math.round(baseFee * multiplier);
         }
         
         function calculateFreeSetsForDirectShipping(setsCount) {
@@ -929,6 +952,11 @@
             
             // Update payment methods section
             updatePaymentMethods(finalTotal, setsTotal, oneTimeFeesTotal, payableSets, freeSets);
+            
+            // Update mobile floating price bar
+            document.getElementById('mobile-bar-price').textContent = `₱${totalPerSet} each`;
+            document.getElementById('mobile-bar-total').textContent = `Total: ₱${finalTotal}`;
+            document.getElementById('mobile-bar-sets').textContent = `${numberOfSets} sets`;
         }
         
         function updatePaymentMethods(finalTotal, setsTotal, oneTimeFeesTotal, payableSets, freeSets) {
@@ -1173,6 +1201,7 @@
         }
         
         function resetSelections() {
+            if (!confirm("Reset all selections to default values?")) return;
             const eventTypeCards = document.querySelectorAll('#event-type-options .option-card');
             eventTypeCards.forEach(card => card.classList.remove('selected'));
             eventTypeCards[0].classList.add('selected');
@@ -1256,7 +1285,6 @@
             localStorage.removeItem('invitationCalculatorData');
             
             updateSummary();
-            alert("All selections have been reset to default values.");
         }
         
         function copyPriceSummary() {
