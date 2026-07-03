@@ -783,14 +783,6 @@
             // Calculate add-ons total
             calculateAddonsTotal();
             
-            // Calculate additional pages for inserts more than 4
-            let additionalPagesText = "";
-            const insertsCount = currentSelections.inserts.value;
-            if (insertsCount > 4) {
-                const additionalPages = insertsCount - 4;
-                additionalPagesText = `${additionalPages} page${additionalPages > 1 ? 's' : ''} add`;
-            }
-            
             // Calculate layout fee based on number of inserts (pages)
             const numberOfPages = currentSelections.inserts.value + 1; // Base invitation + inserts
             
@@ -905,11 +897,6 @@
                 }
             });
 			
-			// Add additional pages text if applicable - THIS GOES BEFORE SETS TOTAL
-            if (additionalPagesText) {
-                oneTimeFeesHTML += `<div class="summary-line">${additionalPagesText}</div>`;
-            }
-            
             // Add layout fee to one-time fees if applicable - ALWAYS SHOW LAYOUT INFO
             if (layoutSummary) {
                 if (layoutSummary.startsWith("Layout fee:")) {
@@ -1382,14 +1369,6 @@ function copyQuotation() {
         }
     });
     
-    // Calculate additional pages for inserts more than 4
-    let additionalPagesText = "";
-    const insertsCount = currentSelections.inserts.value;
-    if (insertsCount > 4) {
-        const additionalPages = insertsCount - 4;
-        additionalPagesText = `${additionalPages} page${additionalPages > 1 ? 's' : ''} add`;
-    }
-    
     // Calculate layout fee based on number of inserts (pages)
     let layoutFee = 0;
     let layoutSummary = "";
@@ -1572,11 +1551,6 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
         quotationText += `\n${addonsSummary}`;
     }
 	
-	// Add additional pages text if applicable
-    if (additionalPagesText) {
-        quotationText += `${additionalPagesText}`;
-    }
-    
 	// Handle sets total
 	let setsTotalText = '';
 	if (currentSelections.discount && freeSets > 0 && (currentSelections.paymentMethod === "direct-shipping" || currentSelections.paymentMethod === "none")) {
