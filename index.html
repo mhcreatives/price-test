@@ -435,12 +435,8 @@
             { id: 'trifold-insert', name: 'Trifold insert', price: 10, unit: 'flat' },
             { id: 'liner', name: 'Liner', price: 20, unit: 'flat' },
 			{ id: 'decals', name: 'Decals', price: 15, unit: 'piece' },
-            { id: 'gold-foil', name: 'Gold foil', price: 15, unit: 'page' },
-            { id: 'silver-foil', name: 'Silver foil', price: 15, unit: 'page' },			
-            { id: 'rosegold-foil', name: 'Rosegold foil', price: 15, unit: 'page' },			
-            { id: 'gold-foil-full-page', name: 'Gold foil full page', price: 20, unit: 'page' },
-            { id: 'silver-foil-full-page', name: 'Silver foil full page', price: 20, unit: 'page' },			
-            { id: 'rosegold-foil-full-page', name: 'Rosegold foil full page', price: 20, unit: 'page' },
+			{ id: 'foil', name: 'Foil', price: 15, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
+			{ id: 'foil-full-page', name: 'Foil full page', price: 20, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
 			{ id: 'envelope-print', name: 'Envelope print', price: 10, unit: 'flat' },
 			{ id: 'website', name: 'Website', price: 599, unit: 'flat' },
 			{ id: 'website-RSVP', name: 'Website with RSVP', price: 699, unit: 'flat' },
@@ -610,10 +606,12 @@
             addonsData.forEach(addon => {
                 const addonItem = document.createElement('div');
                 addonItem.className = 'addon-item';
+                const hasDropdown = addon.dropdown && addon.dropdown.length > 0;
                 addonItem.innerHTML = `
                     <div class="addon-header">
                         <input type="checkbox" class="addon-checkbox" id="addon-${addon.id}" data-id="${addon.id}" data-price="${addon.price}" data-unit="${addon.unit}">
                         <label class="addon-name" for="addon-${addon.id}">${addon.name}</label>
+                        ${hasDropdown ? `<select class="select-input addon-dropdown" id="variant-${addon.id}" style="margin-left: 8px; height: 28px; font-size: 0.85rem; width: auto; display: none;" disabled>${addon.dropdown.map(v => `<option value="${v}">${v}</option>`).join('')}</select>` : ''}
                     </div>
                     ${addon.unit !== 'flat' ? 
                         `<div class="addon-option">
@@ -627,21 +625,25 @@
                 // Add event listeners for checkbox
                 const checkbox = addonItem.querySelector('.addon-checkbox');
                 const quantityInput = addonItem.querySelector('.addon-input');
+                const dropdown = addonItem.querySelector('.addon-dropdown');
                 
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
                         if (quantityInput) quantityInput.disabled = false;
+                        if (dropdown) { dropdown.style.display = 'inline-block'; dropdown.disabled = false; }
                         currentSelections.addons[addon.id] = {
                             name: addon.name,
                             price: addon.price,
                             unit: addon.unit,
-                            quantity: quantityInput ? parseInt(quantityInput.value) || 1 : 1
+                            quantity: quantityInput ? parseInt(quantityInput.value) || 1 : 1,
+                            variant: dropdown ? dropdown.value : null
                         };
                     } else {
                         if (quantityInput) {
                             quantityInput.disabled = true;
                             quantityInput.value = 1;
                         }
+                        if (dropdown) { dropdown.style.display = 'none'; dropdown.disabled = true; }
                         delete currentSelections.addons[addon.id];
                     }
                     updateSummary();
@@ -653,6 +655,17 @@
                     quantityInput.addEventListener('input', function() {
                         if (checkbox.checked) {
                             currentSelections.addons[addon.id].quantity = parseInt(this.value) || 1;
+                            updateSummary();
+                            saveToLocalStorage();
+                        }
+                    });
+                }
+                
+                // Add event listener for dropdown change
+                if (dropdown) {
+                    dropdown.addEventListener('change', function() {
+                        if (checkbox.checked) {
+                            currentSelections.addons[addon.id].variant = this.value;
                             updateSummary();
                             saveToLocalStorage();
                         }
@@ -681,6 +694,9 @@
             let total = 0;
             let summaryHTML = '';
             
+            // Helper to get display name with variant
+            const getAddonDisplayName = (addon) => addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
+            
             Object.keys(currentSelections.addons).forEach(addonId => {
                 const addon = currentSelections.addons[addonId];
                 let addonTotal = 0;
@@ -691,13 +707,13 @@
                         addonTotal = addon.price * currentSelections.inserts.value;
                     } else {
                         addonTotal = addon.price;
-                        summaryHTML += `<div class="summary-line">${addon.name}</div>`;
+                        summaryHTML += `<div class="summary-line">${getAddonDisplayName(addon)}</div>`;
                     }
                 } else if (addon.unit === 'page' || addon.unit === 'piece') {
                     addonTotal = addon.price * addon.quantity * numberOfSets;
                     const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
                                     (addon.quantity === 1 ? 'pc' : 'pcs');
-                    summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${addon.name}</div>`;
+                    summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${getAddonDisplayName(addon)}</div>`;
                 }
                 
                 total += addonTotal;
@@ -893,7 +909,8 @@
                 } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
                     // Flat add-ons NOT in the price-per-set list are one-time fees
                     oneTimeFeesTotal += addon.price;
-                    oneTimeFeesHTML += `<div class="summary-line">${addon.name}: ₱${addon.price}</div>`;
+                    const displayName = addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
+                    oneTimeFeesHTML += `<div class="summary-line">${displayName}: ₱${addon.price}</div>`;
                 }
             });
 			
@@ -1190,6 +1207,12 @@
                                 quantityInput.disabled = false;
                                 quantityInput.value = currentSelections.addons[addonId].quantity;
                             }
+                            const dropdown = document.getElementById(`variant-${addonId}`);
+                            if (dropdown && currentSelections.addons[addonId].variant) {
+                                dropdown.style.display = 'inline-block';
+                                dropdown.disabled = false;
+                                dropdown.value = currentSelections.addons[addonId].variant;
+                            }
                         }
                     });
                 }
@@ -1235,6 +1258,10 @@
             document.querySelectorAll('.addon-input').forEach(input => {
                 input.value = 1;
                 input.disabled = true;
+            });
+            document.querySelectorAll('.addon-dropdown').forEach(dd => {
+                dd.style.display = 'none';
+                dd.disabled = true;
             });
             currentSelections.addons = {};
             
@@ -1296,6 +1323,7 @@
     
     // Get add-ons summary (included in price per set)
     let addonsInPricePerSet = '';
+    const getDisplayName = (addon) => addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
     Object.keys(currentSelections.addons).forEach(addonId => {
         const addon = currentSelections.addons[addonId];
         
@@ -1309,7 +1337,7 @@
             if (flatAddonsInPricePerSet.includes(addonId)) {
                 // These flat add-ons are included in price per set
                 if (addonsInPricePerSet) addonsInPricePerSet += "\n";
-                addonsInPricePerSet += `${addon.name}`;
+                addonsInPricePerSet += `${getDisplayName(addon)}`;
             }
         } else {
             // For per-page/per-piece add-ons, add their price to price per set
@@ -1317,7 +1345,7 @@
             const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
                             (addon.quantity === 1 ? 'pc' : 'pcs');
             if (addonsInPricePerSet) addonsInPricePerSet += "\n";
-            addonsInPricePerSet += `${addon.quantity} ${unitText} ${addon.name}`;
+            addonsInPricePerSet += `${addon.quantity} ${unitText} ${getDisplayName(addon)}`;
         }
     });
     
@@ -1354,18 +1382,19 @@ function copyQuotation() {
     
     // Calculate add-ons total and summary
     let addonsSummary = "";
+    const getDisplayName = (addon) => addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
     
     Object.keys(currentSelections.addons).forEach(addonId => {
         const addon = currentSelections.addons[addonId];
         
         if (addon.unit === 'flat') {
             // Show all flat add-ons in the main summary
-            addonsSummary += `${addon.name}\n`;
+            addonsSummary += `${getDisplayName(addon)}\n`;
         } else if (addon.unit === 'page' || addon.unit === 'piece') {
             // Format: "X page(s)/pc(s) Addon Name" with correct grammar
             const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
                             (addon.quantity === 1 ? 'pc' : 'pcs');
-            addonsSummary += `${addon.quantity} ${unitText} ${addon.name}\n`;
+            addonsSummary += `${addon.quantity} ${unitText} ${getDisplayName(addon)}\n`;
         }
     });
     
@@ -1477,8 +1506,9 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
             oneTimeFeesText += `E-invite (${currentSelections.inserts.value} ${currentSelections.inserts.value === 1 ? 'page' : 'pages'}): ₱${eInviteTotal}\n`;
         } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
             // Flat add-ons NOT in the price-per-set list are one-time fees
+            const displayName = addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
             oneTimeFeesTotal += addon.price;
-            oneTimeFeesText += `${addon.name}: ₱${addon.price}\n`;
+            oneTimeFeesText += `${displayName}: ₱${addon.price}\n`;
         }
     });
     
@@ -1682,6 +1712,10 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     document.querySelectorAll('.addon-input').forEach(input => {
         input.value = 1;
         input.disabled = true;
+    });
+    document.querySelectorAll('.addon-dropdown').forEach(dd => {
+        dd.style.display = 'none';
+        dd.disabled = true;
     });
     currentSelections.addons = {};
     
