@@ -687,9 +687,8 @@
                 
                 if (addon.unit === 'flat') {
                     if (addonId === 'e-invite') {
-                        // E-invite price = P100 × number of inserts
+                        // E-invite price = P100 × number of inserts (shown in one-time fees only)
                         addonTotal = addon.price * currentSelections.inserts.value;
-                        summaryHTML += `<div class="summary-line">E-invite (${currentSelections.inserts.value} ${currentSelections.inserts.value === 1 ? 'page' : 'pages'})</div>`;
                     } else {
                         addonTotal = addon.price;
                         summaryHTML += `<div class="summary-line">${addon.name}</div>`;
