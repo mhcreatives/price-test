@@ -415,7 +415,7 @@
             { id: 'custom-cut', name: 'Custom cut', price: 10, unit: 'page' },
 			            { id: 'arc-cut', name: 'Arc cut', price: 5, unit: 'page' },
             { id: 'photo-print', name: 'Photo print', price: 5, unit: 'page' },
-            { id: 'solid-color-print', name: 'Solid color print', price: 5, unit: 'page' },
+            { id: 'solid-color-print', name: 'Solid color print', price: 5, unit: 'page', dropdown: ['Light', 'Dark', 'Black'] },
             { id: 'vellum-jacket', name: 'Vellum jacket', price: 25, unit: 'flat' },
             { id: 'vellum-jacket-print', name: 'Vellum jacket with print', price: 35, unit: 'flat' },
             { id: 'frosted-insert', name: 'Frosted insert', price: 15, unit: 'page' },
@@ -424,10 +424,9 @@
             { id: 'ribbon-addon', name: 'Ribbon', price: 10, unit: 'flat' },
             { id: 'sticker-seal-addon', name: 'Sticker seal', price: 3, unit: 'flat' },
             { id: 'eyelet', name: 'Eyelet', price: 10, unit: 'piece' },
-            { id: 'glossy-phototop', name: 'Glossy phototop', price: 20, unit: 'page' },
-            { id: 'matte-phototop', name: 'Matte phototop', price: 20, unit: 'page' },
-            { id: 'leather-phototop', name: 'Leather phototop', price: 25, unit: 'page' },
-            { id: 'glitter-phototop', name: 'Glitter phototop', price: 25, unit: 'page' },
+            { id: 'phototop', name: 'Phototop', unit: 'page', dropdown: [
+                {label: 'Glossy', price: 20}, {label: 'Matte', price: 20}, {label: 'Leather', price: 25}, {label: 'Glitter', price: 25}
+            ]},
             { id: 'metal-pin', name: 'Metal pin', price: 5, unit: 'piece' },
             { id: 'sticker-names', name: 'Sticker names', price: 10, unit: 'piece' },
             { id: 'calendar-foil', name: 'Calendar foil', price: 25, unit: 'flat' },
@@ -438,8 +437,9 @@
 			{ id: 'foil', name: 'Foil', price: 15, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
 			{ id: 'foil-full-page', name: 'Foil full page', price: 20, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
 			{ id: 'envelope-print', name: 'Envelope print', price: 10, unit: 'flat' },
-			{ id: 'website', name: 'Website', price: 599, unit: 'flat' },
-			{ id: 'website-RSVP', name: 'Website with RSVP', price: 699, unit: 'flat' },
+			{ id: 'website', name: 'Website', unit: 'flat', dropdown: [
+			    {label: 'No RSVP', price: 599}, {label: 'With RSVP', price: 699}
+			]},
 			{ id: 'e-invite', name: 'E-invite', price: 100, unit: 'flat' }
             
 
@@ -607,11 +607,17 @@
                 const addonItem = document.createElement('div');
                 addonItem.className = 'addon-item';
                 const hasDropdown = addon.dropdown && addon.dropdown.length > 0;
+                const isPriceDropdown = hasDropdown && typeof addon.dropdown[0] === 'object';
+                const dropdownOptions = hasDropdown 
+                    ? (isPriceDropdown 
+                        ? addon.dropdown.map(o => `<option value="${o.label}" data-price="${o.price}">${o.label}</option>`).join('')
+                        : addon.dropdown.map(v => `<option value="${v}">${v}</option>`).join(''))
+                    : '';
                 addonItem.innerHTML = `
                     <div class="addon-header">
                         <input type="checkbox" class="addon-checkbox" id="addon-${addon.id}" data-id="${addon.id}" data-price="${addon.price}" data-unit="${addon.unit}">
                         <label class="addon-name" for="addon-${addon.id}">${addon.name}</label>
-                        ${hasDropdown ? `<select class="select-input addon-dropdown" id="variant-${addon.id}" style="margin-left: 8px; height: 28px; font-size: 0.85rem; width: auto; display: none;" disabled>${addon.dropdown.map(v => `<option value="${v}">${v}</option>`).join('')}</select>` : ''}
+                        ${hasDropdown ? `<select class="select-input addon-dropdown" id="variant-${addon.id}" style="margin-left: 8px; height: 24px; font-size: 0.75rem; width: 100px; display: none;" disabled>${dropdownOptions}</select>` : ''}
                     </div>
                     ${addon.unit !== 'flat' ? 
                         `<div class="addon-option">
@@ -631,12 +637,16 @@
                     if (this.checked) {
                         if (quantityInput) quantityInput.disabled = false;
                         if (dropdown) { dropdown.style.display = 'inline-block'; dropdown.disabled = false; }
+                        const selectedPrice = isPriceDropdown 
+                            ? parseInt(dropdown.options[dropdown.selectedIndex].getAttribute('data-price'))
+                            : addon.price;
                         currentSelections.addons[addon.id] = {
                             name: addon.name,
-                            price: addon.price,
+                            price: selectedPrice,
                             unit: addon.unit,
                             quantity: quantityInput ? parseInt(quantityInput.value) || 1 : 1,
-                            variant: dropdown ? dropdown.value : null
+                            variant: dropdown ? dropdown.value : null,
+                            isPriceDropdown: isPriceDropdown
                         };
                     } else {
                         if (quantityInput) {
@@ -666,6 +676,9 @@
                     dropdown.addEventListener('change', function() {
                         if (checkbox.checked) {
                             currentSelections.addons[addon.id].variant = this.value;
+                            if (isPriceDropdown) {
+                                currentSelections.addons[addon.id].price = parseInt(this.options[this.selectedIndex].getAttribute('data-price'));
+                            }
                             updateSummary();
                             saveToLocalStorage();
                         }
@@ -1074,6 +1087,12 @@
                 try {
                     const data = JSON.parse(savedData);
                     
+                    // Fix duplicate: migrate old addon IDs to new consolidated ones
+                    if (data.currentSelections && data.currentSelections.addons) {
+                        const oldIds = ['gold-foil', 'silver-foil', 'rosegold-foil', 'gold-foil-full-page', 'silver-foil-full-page', 'rosegold-foil-full-page', 'glossy-phototop', 'matte-phototop', 'leather-phototop', 'glitter-phototop', 'website-RSVP'];
+                        oldIds.forEach(id => delete data.currentSelections.addons[id]);
+                    }
+                    
                     // Restore basic data
                     if (data.numberOfSets) numberOfSets = data.numberOfSets;
                     if (data.eventDate) eventDate = data.eventDate;
@@ -1212,6 +1231,11 @@
                                 dropdown.style.display = 'inline-block';
                                 dropdown.disabled = false;
                                 dropdown.value = currentSelections.addons[addonId].variant;
+                                // If it's a price dropdown, ensure price is correct
+                                if (currentSelections.addons[addonId].isPriceDropdown) {
+                                    const opt = dropdown.options[dropdown.selectedIndex];
+                                    if (opt) currentSelections.addons[addonId].price = parseInt(opt.getAttribute('data-price'));
+                                }
                             }
                         }
                     });
