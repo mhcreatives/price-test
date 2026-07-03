@@ -443,7 +443,8 @@
             { id: 'rosegold-foil-full-page', name: 'Rosegold foil full page', price: 20, unit: 'page' },
 			{ id: 'envelope-print', name: 'Envelope print', price: 10, unit: 'flat' },
 			{ id: 'website', name: 'Website', price: 599, unit: 'flat' },
-			{ id: 'website-RSVP', name: 'Website with RSVP', price: 699, unit: 'flat' }
+			{ id: 'website-RSVP', name: 'Website with RSVP', price: 699, unit: 'flat' },
+			{ id: 'e-invite', name: 'E-invite', price: 100, unit: 'page' }
             
 
         ];
@@ -689,11 +690,17 @@
                     // Show all flat add-ons in the main summary (they will be moved to one-time fees if needed)
                     summaryHTML += `<div class="summary-line">${addon.name}</div>`;
                 } else if (addon.unit === 'page' || addon.unit === 'piece') {
-                    addonTotal = addon.price * addon.quantity * numberOfSets;
-                    // Format: "X page(s)/pc(s) Addon Name" with correct grammar
-                    const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
-                                    (addon.quantity === 1 ? 'pc' : 'pcs');
-                    summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${addon.name}</div>`;
+                    if (addonId === 'e-invite') {
+                        // E-invite is a one-time fee per page (not per set)
+                        addonTotal = addon.price * addon.quantity;
+                        summaryHTML += `<div class="summary-line">${addon.quantity} ${addon.quantity === 1 ? 'page' : 'pages'} ${addon.name}</div>`;
+                    } else {
+                        addonTotal = addon.price * addon.quantity * numberOfSets;
+                        // Format: "X page(s)/pc(s) Addon Name" with correct grammar
+                        const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
+                                        (addon.quantity === 1 ? 'pc' : 'pcs');
+                        summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${addon.name}</div>`;
+                    }
                 }
                 
                 total += addonTotal;
@@ -855,6 +862,8 @@
                         addonPricePerSet += addon.price;
                     }
                     // Note: flat add-ons NOT in the list are treated as one-time fees
+                } else if (addonId === 'e-invite') {
+                    // E-invite is a one-time fee — NOT included in price per set
                 } else {
                     // For per-page/per-piece add-ons, add their price to price per set
                     addonPricePerSet += addon.price * addon.quantity;
@@ -889,6 +898,11 @@
                     // Map layout is always a one-time fee
                     oneTimeFeesTotal += addon.price;
                     oneTimeFeesHTML += `<div class="summary-line">Map layout: ₱${addon.price}</div>`;
+                } else if (addonId === 'e-invite') {
+                    // E-invite is a one-time fee per page
+                    const eInviteTotal = addon.price * addon.quantity;
+                    oneTimeFeesTotal += eInviteTotal;
+                    oneTimeFeesHTML += `<div class="summary-line">E-invite (${addon.quantity} ${addon.quantity === 1 ? 'page' : 'pages'}): ₱${eInviteTotal}</div>`;
                 } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
                     // Flat add-ons NOT in the price-per-set list are one-time fees
                     oneTimeFeesTotal += addon.price;
@@ -1308,6 +1322,11 @@
             return;
         }
         
+        if (addonId === 'e-invite') {
+            // E-invite is a one-time fee — NOT included in price per set
+            return;
+        }
+        
         if (addon.unit === 'flat') {
             // Check if this flat add-on should be included in price per set
             if (flatAddonsInPricePerSet.includes(addonId)) {
@@ -1365,6 +1384,8 @@ function copyQuotation() {
         if (addon.unit === 'flat') {
             // Show all flat add-ons in the main summary
             addonsSummary += `${addon.name}\n`;
+        } else if (addonId === 'e-invite') {
+            // E-invite is one-time fee — don't list in per-set addons
         } else if (addon.unit === 'page' || addon.unit === 'piece') {
             // Format: "X page(s)/pc(s) Addon Name" with correct grammar
             const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
@@ -1444,6 +1465,8 @@ function copyQuotation() {
                 // These flat add-ons are included in price per set
                 addonPricePerSet += addon.price;
             }
+        } else if (addonId === 'e-invite') {
+            // E-invite is a one-time fee — NOT included in price per set
         } else {
             // For per-page/per-piece add-ons, add their price to price per set
             addonPricePerSet += addon.price * addon.quantity;
@@ -1482,6 +1505,11 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
             // Map layout is always a one-time fee
             oneTimeFeesTotal += addon.price;
             oneTimeFeesText += `Map layout: ₱${addon.price}\n`;
+        } else if (addonId === 'e-invite') {
+            // E-invite is a one-time fee per page
+            const eInviteTotal = addon.price * addon.quantity;
+            oneTimeFeesTotal += eInviteTotal;
+            oneTimeFeesText += `E-invite (${addon.quantity} ${addon.quantity === 1 ? 'page' : 'pages'}): ₱${eInviteTotal}\n`;
         } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
             // Flat add-ons NOT in the price-per-set list are one-time fees
             oneTimeFeesTotal += addon.price;
