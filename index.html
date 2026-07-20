@@ -29,6 +29,7 @@
 			max-height: calc(100vh - 40px);
 			overflow-y: auto;
 			align-self: start;}
+        .options-panel { overflow-y: visible; }
         .result-panel {
     display: flex;
     flex-direction: column;
@@ -115,7 +116,7 @@
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
         /* Souvenir items */
-        .souvenir-item { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9; margin-bottom: 10px; }
+        .souvenir-item { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9; margin-bottom: 10px; overflow: visible; }
         .souvenir-name { font-weight: 500; font-size: 0.9rem; min-width: 120px; }
         .souvenir-qty { width: 70px; padding: 4px 6px; border: 1px solid #cccccc; border-radius: 3px; font-size: 0.85rem; text-align: center; }
         .souvenir-total { font-weight: 600; font-size: 0.9rem; color: #333; min-width: 70px; text-align: right; }
@@ -581,11 +582,13 @@
             souvenirData.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'souvenir-item';
-                const opts = s.options.map(o => `<option value="${o.label}" data-price="${o.price}">${o.label} — ₱${o.price}/${s.unit}</option>`).join('');
+                const opts = s.options.map(o => {
+                    return `<option value="${o.label}" data-price="${o.price}">${o.label}</option>`;
+                }).join('');
                 const saved = currentSouvenirs[s.id];
                 item.innerHTML = `
                     <span class="souvenir-name">${s.name}</span>
-                    <select class="select-input" id="souv-${s.id}" style="flex:1; min-width:200px; height:32px; font-size:0.85rem;" onchange="updateSouvenir('${s.id}')">
+                    <select class="select-input" id="souv-${s.id}" style="flex:1; min-width:200px; height:32px; font-size:0.85rem; padding:4px 8px; line-height:1.4;" onchange="updateSouvenir('${s.id}')">
                         <option value="">— Select —</option>
                         ${opts}
                     </select>
@@ -984,7 +987,7 @@
                         <input type="checkbox" class="addon-checkbox" id="addon-${addon.id}" data-id="${addon.id}" data-price="${addon.price}" data-unit="${addon.unit}">
                         <label class="addon-name" for="addon-${addon.id}">${addon.name}</label>
                     </div>
-                    ${hasDropdown ? `<div class="addon-option"><select class="select-input addon-dropdown" id="variant-${addon.id}" style="width:100%; height:30px; font-size:0.85rem; display:none;" disabled>${dropdownOptions}</select></div>` : ''}
+                    ${hasDropdown ? `<div class="addon-option"><select class="select-input addon-dropdown" id="variant-${addon.id}" style="width:100%; height:32px; font-size:0.85rem; padding:4px 8px; line-height:1.4; display:none;" disabled>${dropdownOptions}</select></div>` : ''}
                     ${addon.unit !== 'flat' ? 
                         `<div class="addon-option">
                             <label>${addon.unit === 'page' ? 'Pages' : 'Pieces'}:</label>
