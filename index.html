@@ -139,6 +139,9 @@
                 </div>
                 <div class="tab-panel active" id="tab-invitation">
                 <h2 class="section-title">Customization Options</h2>
+                <div class="discount-checkbox-row" style="margin-bottom:12px;">
+                    <div class="discount-checkbox"><input type="checkbox" id="passport-only-mode"><label for="passport-only-mode">Passport invitation only (hide invitation breakdown)</label></div>
+                </div>
                 <div class="option-group">
                     <label class="option-label">1. Event Type</label>
                     <div class="event-option-grid" id="event-type-options">
@@ -262,7 +265,7 @@
 
 			
                 <div class="option-group"><label class="option-label">4. Number of Inserts</label>
-                    <div class="slider-container"><input type="range" id="inserts-slider" min="0" max="10" value="0" step="1"><div class="slider-value" id="inserts-value">0 inserts</div></div>
+                    <div class="addon-option"><label>Inserts:</label><input type="number" class="addon-input" id="inserts-input" min="0" max="100" value="0" oninput="this.value = Math.max(0, parseInt(this.value) || 0)"></div>
                 </div>
                 <div class="option-group"><label class="option-label">5. Paper Type</label>
                     <div class="option-grid" id="paper-options">
@@ -373,6 +376,10 @@
             </div><!-- /tab-invitation -->
             <div class="tab-panel" id="tab-passport">
                 <h2 class="section-title">Passport Invitation Options</h2>
+                <div class="discount-checkbox-row" style="margin-bottom:12px;">
+                    <div class="discount-checkbox"><input type="checkbox" id="passport-enabled"><label for="passport-enabled">Include passport invitation</label></div>
+                </div>
+                <div id="passport-options-content" style="display:none;">
                 <div class="option-group">
                     <label class="option-label">Type</label>
                     <div class="option-grid" id="passport-type-options">
@@ -401,6 +408,7 @@
                         <option value="">— Select ribbon —</option>
                     </select>
                 </div>
+                </div><!-- /passport-options-content -->
             </div><!-- /tab-passport -->
             <div class="tab-panel" id="tab-souvenir">
                 <h2 class="section-title">Souvenir Options</h2>
@@ -478,15 +486,15 @@
             { id: 'frosted-insert', name: 'Frosted insert', price: 15, unit: 'page' },
             { id: 'different-sized-insert', name: 'Different sized insert', price: 5, unit: 'flat' },
             { id: 'back-to-back-print', name: 'Back to back print', price: 5, unit: 'page' },
-            { id: 'ribbon-addon', name: 'Ribbon', price: 10, unit: 'flat' },
+            { id: 'ribbon-addon', name: 'Ribbon', price: 10, unit: 'flat', dropdown: ['Silver Grey', 'Gold', 'Rosegold', 'White', 'Black', 'Navy Blue', 'Dusty Blue', 'Blush Pink', 'Sage Green', 'Burgundy'] },
             { id: 'sticker-seal-addon', name: 'Sticker seal', price: 3, unit: 'flat' },
             { id: 'eyelet', name: 'Eyelet', price: 10, unit: 'piece' },
             { id: 'phototop', name: 'Phototop', unit: 'page', dropdown: [
                 {label: 'Glossy', price: 20}, {label: 'Matte', price: 20}, {label: 'Leather', price: 25}, {label: 'Glitter', price: 25}
             ]},
-            { id: 'metal-pin', name: 'Metal pin', price: 5, unit: 'piece' },
+            { id: 'metal-pin', name: 'Metal pin', price: 5, unit: 'piece', dropdown: ['Gold', 'Silver', 'Rosegold', 'Black'] },
             { id: 'sticker-names', name: 'Sticker names', price: 10, unit: 'piece' },
-            { id: 'calendar-foil', name: 'Calendar foil', price: 25, unit: 'flat' },
+            { id: 'calendar-foil', name: 'Calendar foil', price: 25, unit: 'flat', dropdown: ['Gold', 'Silver', 'Rosegold'] },
             { id: 'folded-insert', name: 'Folded insert', price: 5, unit: 'flat' },
             { id: 'trifold-insert', name: 'Trifold insert', price: 10, unit: 'flat' },
             { id: 'liner', name: 'Liner', price: 20, unit: 'flat' },
@@ -640,7 +648,7 @@
                 const s = currentSouvenirs[id];
                 if (s.qty > 0) {
                     const item = souvenirData.find(d => d.id === id);
-                    html += `<div class="summary-line">${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ₱${s.price * s.qty}</div>`;
+                    html += `<div class="summary-line">${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ${s.qty} x ₱${s.price} = ₱${s.price * s.qty}</div>`;
                 }
             });
             return html;
@@ -652,7 +660,7 @@
                 const s = currentSouvenirs[id];
                 if (s.qty > 0) {
                     const item = souvenirData.find(d => d.id === id);
-                    text += `${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ₱${s.price * s.qty}\n`;
+                    text += `${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ${s.qty} x ₱${s.price} = ₱${s.price * s.qty}\n`;
                 }
             });
             return text;
@@ -665,10 +673,20 @@
             leaves: 2, leafExtra: 0,
             color: '', ribbon: ''
         };
+        let passportOnlyMode = false;
         
         const passportRibbons = ['Silver Grey', 'Gold', 'Rosegold', 'White', 'Black', 'Navy Blue', 'Dusty Blue', 'Blush Pink', 'Sage Green', 'Burgundy'];
         
         function setupPassport() {
+            // Enable/disable toggle
+            document.getElementById('passport-enabled').addEventListener('change', function() {
+                const show = this.checked;
+                document.getElementById('passport-options-content').style.display = show ? 'block' : 'none';
+                passportSelection.enabled = show;
+                updateSummary();
+                saveToLocalStorage();
+            });
+            
             // Type cards
             document.querySelectorAll('#passport-type-options .option-card').forEach(card => {
                 card.addEventListener('click', function() {
@@ -747,6 +765,10 @@
         
         function restorePassportUI() {
             if (!passportSelection.type) return;
+            // Restore enabled state
+            const enabled = passportSelection.enabled;
+            document.getElementById('passport-enabled').checked = !!enabled;
+            document.getElementById('passport-options-content').style.display = enabled ? 'block' : 'none';
             // Restore type
             document.querySelectorAll('#passport-type-options .option-card').forEach(c => {
                 c.classList.toggle('selected', c.getAttribute('data-value') === passportSelection.type);
@@ -790,7 +812,7 @@
         }
         
         function getPassportTotal() {
-            if (!passportSelection.type) return 0;
+            if (!passportSelection.enabled || !passportSelection.type) return { perSet: 0, setsTotal: 0, layoutFee: 0, grandTotal: 0 };
             const perSet = passportSelection.basePrice + passportSelection.paperPrice + passportSelection.leafExtra;
             const setsTotal = perSet * numberOfSets;
             // Layout fee: 100 + 100 * (cover 2 + insert leaves)
@@ -800,7 +822,7 @@
         
         function getPassportBreakdown() {
             const t = getPassportTotal();
-            if (!passportSelection.type || numberOfSets <= 0) return '';
+            if (!passportSelection.enabled || t.grandTotal <= 0) return '';
             let html = `<div class="summary-line"><strong>Passport invitation</strong></div>`;
             html += `<div class="summary-line">${passportSelection.name}</div>`;
             if (passportSelection.color) html += `<div class="summary-line">${passportSelection.color} holder</div>`;
@@ -853,6 +875,13 @@
             // Initialize passport tab
             setupPassport();
             
+            // Passport-only mode toggle
+            document.getElementById('passport-only-mode').addEventListener('change', function() {
+                passportOnlyMode = this.checked;
+                updateSummary();
+                saveToLocalStorage();
+            });
+            
            document.getElementById('envelope-checkbox').addEventListener('change', function() {
                 currentSelections.envelope.custom = this.checked;
                 updateSummary();
@@ -871,10 +900,9 @@
                 saveToLocalStorage();
             });
 			
-			document.getElementById('inserts-slider').addEventListener('input', function() {
-                const insertCount = parseInt(this.value);
+			document.getElementById('inserts-input').addEventListener('input', function() {
+                const insertCount = parseInt(this.value) || 0;
                 const insertPrice = insertCount * INSERT_PRICE;
-                document.getElementById('inserts-value').textContent = `${insertCount} insert${insertCount !== 1 ? 's' : ''}`;
                 currentSelections.inserts = { value: insertCount, price: insertPrice };
                 updateSummary();
                 saveToLocalStorage();
@@ -1317,7 +1345,8 @@
             const souvenirTotal = recalcSouvenirs();
             const passportData = getPassportTotal();
             const passportTotal = passportData.grandTotal || 0;
-            const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal + passportTotal;
+            const inviContribution = passportOnlyMode ? 0 : setsTotal;
+            const finalTotal = inviContribution + oneTimeFeesTotal + souvenirTotal + passportTotal;
             
             // Update display
             document.getElementById('price-per-set').textContent = `₱${totalPerSet} each`;
@@ -1377,6 +1406,11 @@
             document.getElementById('mobile-bar-price').textContent = `₱${totalPerSet} each`;
             document.getElementById('mobile-bar-total').textContent = `Total: ₱${finalTotal}`;
             document.getElementById('mobile-bar-sets').textContent = `${numberOfSets} sets`;
+            
+            // Toggle invitation breakdown visibility for passport-only mode
+            const inviEls = document.querySelectorAll('#event-type-title, #event-date-display, #payment-method-display, #price-per-set, #summary-size-line, #summary-envelope-line, #summary-inserts-line, #summary-paper-line, #summary-seal-line, #addons-summary, #one-time-fees, #sets-total');
+            inviEls.forEach(el => el.style.display = passportOnlyMode ? 'none' : '');
+            document.getElementById('addons-summary').style.display = passportOnlyMode ? 'none' : '';
         }
         
         function updatePaymentMethods(finalTotal, setsTotal, oneTimeFeesTotal, payableSets, freeSets) {
@@ -1472,7 +1506,8 @@
                 numberOfSets: numberOfSets,
                 eventDate: eventDate,
                 currentSouvenirs: currentSouvenirs,
-                passportSelection: passportSelection
+                passportSelection: passportSelection,
+                passportOnlyMode: passportOnlyMode
             };
             localStorage.setItem('invitationCalculatorData', JSON.stringify(saveData));
         }
@@ -1494,6 +1529,7 @@
                     
                     // Restore passport
                     if (data.passportSelection) passportSelection = data.passportSelection;
+                    if (data.passportOnlyMode !== undefined) { passportOnlyMode = data.passportOnlyMode; document.getElementById('passport-only-mode').checked = passportOnlyMode; }
                     
                     // Restore basic data
                     if (data.numberOfSets) numberOfSets = data.numberOfSets;
@@ -1552,8 +1588,7 @@
 			}
             
             // Update inserts slider
-            document.getElementById('inserts-slider').value = currentSelections.inserts.value;
-            document.getElementById('inserts-value').textContent = `${currentSelections.inserts.value} insert${currentSelections.inserts.value !== 1 ? 's' : ''}`;
+            document.getElementById('inserts-input').value = currentSelections.inserts.value;
             
             // Update paper
             const paperCards = document.querySelectorAll('#paper-options .option-card');
@@ -1663,8 +1698,7 @@
             envelopeCards[1].classList.add('selected');
             currentSelections.envelope = { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" };
             
-            document.getElementById('inserts-slider').value = 0;
-            document.getElementById('inserts-value').textContent = '0 inserts';
+            document.getElementById('inserts-input').value = 0;
             currentSelections.inserts = { value: 0, price: 0 };
             
             const paperCards = document.querySelectorAll('#paper-options .option-card');
@@ -1968,7 +2002,8 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     const souvenirTotal = recalcSouvenirs();
     const passportData = getPassportTotal();
     const passportTotal = passportData.grandTotal || 0;
-    const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal + passportTotal;
+    const inviContribution = passportOnlyMode ? 0 : setsTotal;
+    const finalTotal = inviContribution + oneTimeFeesTotal + souvenirTotal + passportTotal;
     
     // Calculate payment details - NEW LOGIC: For direct shipping, subtract free sets from total
     const shippingFee = calculateShippingFee(finalTotal);
@@ -2001,7 +2036,11 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     }
     
     // Build quotation text with proper formatting
-    let quotationText = `${eventTitle}`;
+    let quotationText = '';
+    
+    // Invitation section — skip if passport-only mode
+    if (!passportOnlyMode) {
+        quotationText = `${eventTitle}`;
     
     if (formattedEventDate) {
         quotationText += `\nEvent Date: ${formattedEventDate}`;
@@ -2032,6 +2071,7 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
         // Add a single newline before the layout/rush info
         quotationText += `\n${oneTimeFeesText.trim()}`;
     }
+    } // end passportOnlyMode check
     
     // Add souvenir items
     const souvenirText = getSouvenirCopyText();
@@ -2140,8 +2180,7 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     envelopeCards[1].classList.add('selected');
     currentSelections.envelope = { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" };
     
-    document.getElementById('inserts-slider').value = 0;
-    document.getElementById('inserts-value').textContent = '0 inserts';
+    document.getElementById('inserts-input').value = 0;
     currentSelections.inserts = { value: 0, price: 0 };
     
     const paperCards = document.querySelectorAll('#paper-options .option-card');
@@ -2378,8 +2417,7 @@ function parseCustomEnvelopeDetails(line) {
             const insertMatch = line.match(/(\d+)\s*inserts?/i);
             if (insertMatch) {
                 const insertCount = parseInt(insertMatch[1]);
-                document.getElementById('inserts-slider').value = insertCount;
-                document.getElementById('inserts-value').textContent = `${insertCount} insert${insertCount !== 1 ? 's' : ''}`;
+                document.getElementById('inserts-input').value = insertCount;
                 currentSelections.inserts = { value: insertCount, price: insertCount * INSERT_PRICE };
                 break;
             }
