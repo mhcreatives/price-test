@@ -133,6 +133,7 @@
             <div class="options-panel">
                 <div class="tab-nav">
                     <button class="tab-btn active" onclick="switchTab('invitation')">Invitation</button>
+                    <button class="tab-btn" onclick="switchTab('passport')">Passport</button>
                     <button class="tab-btn" onclick="switchTab('souvenir')">Souvenir</button>
                 </div>
                 <div class="tab-panel active" id="tab-invitation">
@@ -369,6 +370,37 @@
                     <button class="action-button" id="print-button"><i class="fas fa-print"></i> Print</button>
                 </div>
             </div><!-- /tab-invitation -->
+            <div class="tab-panel" id="tab-passport">
+                <h2 class="section-title">Passport Invitation Options</h2>
+                <div class="option-group">
+                    <label class="option-label">Type</label>
+                    <div class="option-grid" id="passport-type-options">
+                        <div class="option-card selected" data-value="passport" data-price="80"><div class="option-name">Passport</div></div>
+                        <div class="option-card" data-value="passport-holder" data-price="95"><div class="option-name">Passport with holder</div></div>
+                    </div>
+                </div>
+                <div class="option-group" id="passport-holder-color-group" style="display:none;">
+                    <label class="option-label">Holder Color</label>
+                    <select class="select-input" id="passport-color-select" style="height: 40px; font-size: 15px; width: 200px;"></select>
+                </div>
+                <div class="option-group">
+                    <label class="option-label">Paper Type</label>
+                    <div class="option-grid" id="passport-paper-options">
+                        <div class="option-card selected" data-value="glossy" data-price="0"><div class="option-name">Glossy</div></div>
+                        <div class="option-card" data-value="matte" data-price="20"><div class="option-name">Matte</div></div>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <label class="option-label">Insert Leaves (excludes cover)</label>
+                    <div class="slider-container"><input type="range" id="passport-leaves-slider" min="2" max="20" value="2" step="2"><div class="slider-value" id="passport-leaves-value">2 leaves</div></div>
+                </div>
+                <div class="option-group" id="passport-ribbon-group" style="display:none;">
+                    <label class="option-label">Ribbon (included with holder)</label>
+                    <select class="select-input" id="passport-ribbon-select" style="height: 40px; font-size: 15px; width: 200px;">
+                        <option value="">— Select ribbon —</option>
+                    </select>
+                </div>
+            </div><!-- /tab-passport -->
             <div class="tab-panel" id="tab-souvenir">
                 <h2 class="section-title">Souvenir Options</h2>
                 <div id="souvenir-items"></div>
@@ -390,6 +422,7 @@
                         <div class="addons-summary" id="addons-summary"></div>
                         <div class="one-time-fees" id="one-time-fees"></div>
                         <div class="one-time-fees" id="souvenir-breakdown" style="display:none;"></div>
+                        <div class="one-time-fees" id="passport-breakdown" style="display:none; border-top: 1px dashed #cccccc; margin-top: 8px; padding-top: 8px;"></div>
                         <div class="sets-total" id="sets-total">20 sets x ₱25 each = ₱500</div>
                     </div>
                     <div class="final-total" id="final-total">Total: ₱500</div>
@@ -622,6 +655,179 @@
             return text;
         }
         
+        // === Passport state ===
+        let passportSelection = {
+            type: 'passport', basePrice: 80, name: 'Passport',
+            paper: 'glossy', paperPrice: 0, paperName: 'Glossy',
+            leaves: 2, leafExtra: 0,
+            color: '', ribbon: ''
+        };
+        
+        const passportRibbons = ['Silver Grey', 'Gold', 'Rosegold', 'White', 'Black', 'Navy Blue', 'Dusty Blue', 'Blush Pink', 'Sage Green', 'Burgundy'];
+        
+        function setupPassport() {
+            // Type cards
+            document.querySelectorAll('#passport-type-options .option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('#passport-type-options .option-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    passportSelection.type = this.getAttribute('data-value');
+                    passportSelection.basePrice = parseInt(this.getAttribute('data-price'));
+                    passportSelection.name = this.querySelector('.option-name').textContent;
+                    const isHolder = passportSelection.type === 'passport-holder';
+                    document.getElementById('passport-holder-color-group').style.display = isHolder ? 'block' : 'none';
+                    document.getElementById('passport-ribbon-group').style.display = isHolder ? 'block' : 'none';
+                    if (!isHolder) { passportSelection.color = ''; passportSelection.ribbon = ''; }
+                    updatePassportSummary();
+                });
+            });
+            
+            // Paper cards
+            document.querySelectorAll('#passport-paper-options .option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('#passport-paper-options .option-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    passportSelection.paper = this.getAttribute('data-value');
+                    passportSelection.paperPrice = parseInt(this.getAttribute('data-price'));
+                    passportSelection.paperName = this.querySelector('.option-name').textContent;
+                    updatePassportSummary();
+                });
+            });
+            
+            // Leaves slider
+            const leafSlider = document.getElementById('passport-leaves-slider');
+            leafSlider.addEventListener('input', function() {
+                passportSelection.leaves = parseInt(this.value);
+                document.getElementById('passport-leaves-value').textContent = `${this.value} leaves`;
+                passportSelection.leafExtra = Math.max(0, (passportSelection.leaves - 2) / 2) * 10;
+                updatePassportSummary();
+            });
+            
+            // Populate color dropdown from invitation colors
+            syncPassportColors();
+            
+            // Listen for invitation color changes to sync
+            document.getElementById('color-select').addEventListener('change', function() {
+                syncPassportColors();
+                if (passportSelection.type === 'passport-holder') {
+                    document.getElementById('passport-color-select').value = this.value;
+                    passportSelection.color = this.value;
+                    updatePassportSummary();
+                    saveToLocalStorage();
+                }
+            });
+            
+            // Passport color change
+            document.getElementById('passport-color-select').addEventListener('change', function() {
+                passportSelection.color = this.value;
+                updatePassportSummary();
+                saveToLocalStorage();
+            });
+            
+            // Populate ribbon dropdown
+            passportRibbons.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r; opt.textContent = r;
+                document.getElementById('passport-ribbon-select').appendChild(opt);
+            });
+            
+            // Passport ribbon change
+            document.getElementById('passport-ribbon-select').addEventListener('change', function() {
+                passportSelection.ribbon = this.value;
+                updatePassportSummary();
+                saveToLocalStorage();
+            });
+            
+            // Restore saved passport state
+            restorePassportUI();
+        }
+        
+        function restorePassportUI() {
+            if (!passportSelection.type) return;
+            // Restore type
+            document.querySelectorAll('#passport-type-options .option-card').forEach(c => {
+                c.classList.toggle('selected', c.getAttribute('data-value') === passportSelection.type);
+            });
+            // Restore paper
+            document.querySelectorAll('#passport-paper-options .option-card').forEach(c => {
+                c.classList.toggle('selected', c.getAttribute('data-value') === passportSelection.paper);
+            });
+            // Restore leaves
+            document.getElementById('passport-leaves-slider').value = passportSelection.leaves;
+            document.getElementById('passport-leaves-value').textContent = `${passportSelection.leaves} leaves`;
+            // Restore color and ribbon
+            const isHolder = passportSelection.type === 'passport-holder';
+            document.getElementById('passport-holder-color-group').style.display = isHolder ? 'block' : 'none';
+            document.getElementById('passport-ribbon-group').style.display = isHolder ? 'block' : 'none';
+            if (isHolder) {
+                if (passportSelection.color) document.getElementById('passport-color-select').value = passportSelection.color;
+                if (passportSelection.ribbon) document.getElementById('passport-ribbon-select').value = passportSelection.ribbon;
+            }
+        }
+        
+        function syncPassportColors() {
+            const invColor = document.getElementById('color-select');
+            const passColor = document.getElementById('passport-color-select');
+            passColor.innerHTML = '';
+            const emptyOpt = document.createElement('option');
+            emptyOpt.value = ''; emptyOpt.textContent = 'Select color';
+            passColor.appendChild(emptyOpt);
+            for (let i = 1; i < invColor.options.length; i++) {
+                const opt = document.createElement('option');
+                opt.value = invColor.options[i].value;
+                opt.textContent = invColor.options[i].textContent;
+                passColor.appendChild(opt);
+            }
+            // Restore if had selection
+            if (passportSelection.color) passColor.value = passportSelection.color;
+        }
+        
+        function updatePassportSummary() {
+            updateSummary();
+        }
+        
+        function getPassportTotal() {
+            if (!passportSelection.type) return 0;
+            const perSet = passportSelection.basePrice + passportSelection.paperPrice + passportSelection.leafExtra;
+            const setsTotal = perSet * numberOfSets;
+            // Layout fee: 100 + 100 * (cover 2 + insert leaves)
+            const layoutFee = 100 + (100 * (2 + passportSelection.leaves));
+            return { perSet, setsTotal, layoutFee, grandTotal: setsTotal + layoutFee };
+        }
+        
+        function getPassportBreakdown() {
+            const t = getPassportTotal();
+            if (!passportSelection.type || numberOfSets <= 0) return '';
+            let html = `<div class="summary-line"><strong>Passport invitation</strong></div>`;
+            html += `<div class="summary-line">${passportSelection.name}</div>`;
+            if (passportSelection.color) html += `<div class="summary-line">${passportSelection.color} holder</div>`;
+            html += `<div class="summary-line">3R size</div>`;
+            html += `<div class="summary-line">${passportSelection.paperName} paper</div>`;
+            html += `<div class="summary-line">${passportSelection.leaves} leaves</div>`;
+            if (passportSelection.ribbon && passportSelection.type === 'passport-holder') html += `<div class="summary-line">${passportSelection.ribbon} Ribbon</div>`;
+            html += `<div style="margin-top: 6px; font-weight: 600;">${numberOfSets} sets x ₱${t.perSet} each = ₱${t.setsTotal}</div>`;
+            html += `<div class="summary-line">Layout fee: ₱${t.layoutFee}</div>`;
+            html += `<div style="font-weight: 600;">Passport Total: ₱${t.grandTotal}</div>`;
+            return html;
+        }
+        
+        function getPassportCopyText() {
+            const t = getPassportTotal();
+            if (!passportSelection.type || numberOfSets <= 0) return '';
+            let text = 'Passport invitation\n\n';
+            text += `₱${t.perSet} each\n\n`;
+            text += `${passportSelection.name}\n`;
+            if (passportSelection.color) text += `${passportSelection.color} holder\n`;
+            text += `3R size\n`;
+            text += `${passportSelection.paperName} paper\n`;
+            text += `${passportSelection.leaves} leaves\n`;
+            if (passportSelection.ribbon && passportSelection.type === 'passport-holder') text += `${passportSelection.ribbon} Ribbon\n`;
+            text += `\n${numberOfSets} sets x ₱${t.perSet} each = ₱${t.setsTotal}\n`;
+            text += `Layout fee: ₱${t.layoutFee}\n\n`;
+            text += `Passport Total: ₱${t.grandTotal}`;
+            return text;
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('current-year').textContent = new Date().getFullYear();
             
@@ -640,6 +846,9 @@
             
             // Initialize souvenir items
             renderSouvenirs();
+            
+            // Initialize passport tab
+            setupPassport();
             
            document.getElementById('envelope-checkbox').addEventListener('change', function() {
                 currentSelections.envelope.custom = this.checked;
@@ -1103,7 +1312,9 @@
             
             
             const souvenirTotal = recalcSouvenirs();
-            const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal;
+            const passportData = getPassportTotal();
+            const passportTotal = passportData.grandTotal || 0;
+            const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal + passportTotal;
             
             // Update display
             document.getElementById('price-per-set').textContent = `₱${totalPerSet} each`;
@@ -1143,6 +1354,17 @@
             } else {
                 souvenirEl.innerHTML = '';
                 souvenirEl.style.display = 'none';
+            }
+            
+            // Update passport breakdown
+            const passportBreakdown = getPassportBreakdown();
+            const passportEl = document.getElementById('passport-breakdown');
+            if (passportBreakdown) {
+                passportEl.innerHTML = passportBreakdown;
+                passportEl.style.display = 'block';
+            } else {
+                passportEl.innerHTML = '';
+                passportEl.style.display = 'none';
             }
             
             // Update payment methods section
@@ -1246,7 +1468,8 @@
                 currentSelections: currentSelections,
                 numberOfSets: numberOfSets,
                 eventDate: eventDate,
-                currentSouvenirs: currentSouvenirs
+                currentSouvenirs: currentSouvenirs,
+                passportSelection: passportSelection
             };
             localStorage.setItem('invitationCalculatorData', JSON.stringify(saveData));
         }
@@ -1265,6 +1488,9 @@
                     
                     // Restore souvenirs
                     if (data.currentSouvenirs) currentSouvenirs = data.currentSouvenirs;
+                    
+                    // Restore passport
+                    if (data.passportSelection) passportSelection = data.passportSelection;
                     
                     // Restore basic data
                     if (data.numberOfSets) numberOfSets = data.numberOfSets;
@@ -1508,6 +1734,10 @@
             currentSouvenirs = {};
             renderSouvenirs();
             
+            // Reset passport
+            passportSelection = { type: 'passport', basePrice: 80, name: 'Passport', paper: 'glossy', paperPrice: 0, paperName: 'Glossy', leaves: 2, leafExtra: 0, color: '', ribbon: '' };
+            if (typeof restorePassportUI === 'function') restorePassportUI();
+            
             updateSummary();
         }
         
@@ -1733,7 +1963,9 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     
     const souvenirTotal = recalcSouvenirs();
-    const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal;
+    const passportData = getPassportTotal();
+    const passportTotal = passportData.grandTotal || 0;
+    const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal + passportTotal;
     
     // Calculate payment details - NEW LOGIC: For direct shipping, subtract free sets from total
     const shippingFee = calculateShippingFee(finalTotal);
@@ -1802,6 +2034,12 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     const souvenirText = getSouvenirCopyText();
     if (souvenirText) {
         quotationText += `\n\n${souvenirText.trim()}`;
+    }
+    
+    // Add passport
+    const passportText = getPassportCopyText();
+    if (passportText) {
+        quotationText += `\n\n${passportText}`;
     }
     
     quotationText += `\n\nTotal: ₱${finalTotal}`;
@@ -1959,6 +2197,9 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     currentSouvenirs = {};
     renderSouvenirs();
+    
+    passportSelection = { type: 'passport', basePrice: 80, name: 'Passport', paper: 'glossy', paperPrice: 0, paperName: 'Glossy', leaves: 2, leafExtra: 0, color: '', ribbon: '' };
+    if (typeof restorePassportUI === 'function') restorePassportUI();
     
     updateSummary();
 }
