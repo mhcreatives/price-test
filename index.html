@@ -699,7 +699,8 @@
                 const s = currentSouvenirs[id];
                 if (s.qty > 0) {
                     const item = souvenirData.find(d => d.id === id);
-                    html += `<div class="summary-line">${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ${s.qty} x ₱${s.price} = ₱${s.price * s.qty}</div>`;
+                    html += `<div class="summary-line">${item.name} (${s.variant})</div>`;
+                    html += `<div class="summary-line">${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} x ₱${s.price} each = ₱${s.price * s.qty}</div>`;
                 }
             });
             return html;
@@ -711,7 +712,8 @@
                 const s = currentSouvenirs[id];
                 if (s.qty > 0) {
                     const item = souvenirData.find(d => d.id === id);
-                    text += `${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ${s.qty} x ₱${s.price} = ₱${s.price * s.qty}\n`;
+                    text += `${item.name} (${s.variant})\n`;
+                    text += `${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} x ₱${s.price} each = ₱${s.price * s.qty}\n`;
                 }
             });
             return text;
@@ -1225,10 +1227,11 @@
         }
         
         function calculateShippingFee(totalAmount) {
-            // Courier base prices
+            // Courier base prices and free shipping thresholds
             const courierPrices = { 'spx': 100, 'jnt': 150, 'lbc': 200 };
+            const freeThresholds = { 'spx': 6000, 'jnt': 6000, 'lbc': 10000 };
             let baseFee = courierPrices[courier] || 100;
-            if (totalAmount >= 6000) baseFee = 0; // FREE shipping
+            if (totalAmount >= (freeThresholds[courier] || 6000)) baseFee = 0;
             
             // Apply location multiplier
             const locationMultipliers = {
