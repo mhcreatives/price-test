@@ -262,7 +262,7 @@
 
 			
                 <div class="option-group"><label class="option-label">4. Number of Inserts</label>
-                    <div class="addon-option"><label>Inserts:</label><input type="number" class="addon-input" id="inserts-input" min="0" max="100" value="0" oninput="this.value = Math.max(0, parseInt(this.value) || 0)"></div>
+                    <div class="addon-option"><label>Inserts:</label><input type="number" class="addon-input" id="inserts-input" min="0" max="100" value="2" oninput="this.value = Math.max(0, parseInt(this.value) || 0)"></div>
                 </div>
                 <div class="option-group"><label class="option-label">5. Paper Type</label>
                     <div class="option-grid" id="paper-options">
@@ -444,6 +444,7 @@
             <div class="tab-panel" id="tab-souvenir">
                 <h2 class="section-title">Souvenir Options</h2>
                 <div id="souvenir-items"></div>
+                <button class="action-button reset-button" id="reset-souvenir-button" style="margin-top:10px; width:100%;"><i class="fas fa-redo-alt"></i> Reset Souvenirs</button>
             </div><!-- /tab-souvenir -->
             </div>
             <div class="result-panel">
@@ -490,7 +491,7 @@
             eventType: { value: "wedding", price: 0, name: "Wedding" },
             size: { value: "4r", price: 0, name: "4R" },
             envelope: { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" },
-            inserts: { value: 0, price: 0 },
+            inserts: { value: 2, price: 10 },
             paper: { value: "matte", price: 0, name: "Matte" },
             seal: { value: "no-seal", price: 0, name: "No seal" },
             layout: { required: false, type: "no-layout", pages: 1 },
@@ -952,6 +953,14 @@
             
             // Initialize souvenir items
             renderSouvenirs();
+            
+            // Reset souvenir button
+            document.getElementById('reset-souvenir-button').addEventListener('click', function() {
+                currentSouvenirs = {};
+                renderSouvenirs();
+                updateSummary();
+                saveToLocalStorage();
+            });
             
             // Initialize passport tab
             setupPassport();
@@ -1792,8 +1801,8 @@
             envelopeCards[1].classList.add('selected');
             currentSelections.envelope = { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" };
             
-            document.getElementById('inserts-input').value = 0;
-            currentSelections.inserts = { value: 0, price: 0 };
+            document.getElementById('inserts-input').value = 2;
+            currentSelections.inserts = { value: 2, price: 10 };
             
             const paperCards = document.querySelectorAll('#paper-options .option-card');
             paperCards.forEach(card => card.classList.remove('selected'));
@@ -2274,8 +2283,8 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     envelopeCards[1].classList.add('selected');
     currentSelections.envelope = { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" };
     
-    document.getElementById('inserts-input').value = 0;
-    currentSelections.inserts = { value: 0, price: 0 };
+    document.getElementById('inserts-input').value = 2;
+    currentSelections.inserts = { value: 2, price: 10 };
     
     const paperCards = document.querySelectorAll('#paper-options .option-card');
     paperCards.forEach(card => card.classList.remove('selected'));
