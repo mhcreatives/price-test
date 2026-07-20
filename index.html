@@ -75,8 +75,7 @@
         .discount-checkbox input { margin: 0; }
         .addon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .addon-item { display: flex; flex-direction: column; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9; height: 100%; overflow: visible; }
-        .addon-header { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
-        .addon-header .addon-dropdown { flex-shrink: 0; }
+        .addon-header { display: flex; align-items: center; margin-bottom: 4px; }
         .addon-checkbox { margin-right: 10px; margin-top: 2px; }
         .addon-name { font-weight: 500; color: #333333; font-size: 0.9rem; }
         .addon-option { display: flex; align-items: center; margin-top: 5px; font-size: 0.85rem; color: #666666; }
@@ -984,8 +983,8 @@
                     <div class="addon-header">
                         <input type="checkbox" class="addon-checkbox" id="addon-${addon.id}" data-id="${addon.id}" data-price="${addon.price}" data-unit="${addon.unit}">
                         <label class="addon-name" for="addon-${addon.id}">${addon.name}</label>
-                        ${hasDropdown ? `<select class="select-input addon-dropdown" id="variant-${addon.id}" style="margin-left: 8px; height: 28px; font-size: 0.8rem; width: 140px; display: none;" disabled>${dropdownOptions}</select>` : ''}
                     </div>
+                    ${hasDropdown ? `<div class="addon-option"><select class="select-input addon-dropdown" id="variant-${addon.id}" style="width:100%; height:30px; font-size:0.85rem; display:none;" disabled>${dropdownOptions}</select></div>` : ''}
                     ${addon.unit !== 'flat' ? 
                         `<div class="addon-option">
                             <label>${addon.unit === 'page' ? 'Pages' : 'Pieces'}:</label>
@@ -1003,7 +1002,7 @@
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
                         if (quantityInput) quantityInput.disabled = false;
-                        if (dropdown) { dropdown.style.display = 'inline-block'; dropdown.disabled = false; }
+                        if (dropdown) { dropdown.style.display = 'block'; dropdown.disabled = false; }
                         const selectedPrice = isPriceDropdown 
                             ? parseInt(dropdown.options[dropdown.selectedIndex].getAttribute('data-price'))
                             : addon.price;
@@ -1628,7 +1627,7 @@
                             }
                             const dropdown = document.getElementById(`variant-${addonId}`);
                             if (dropdown && currentSelections.addons[addonId].variant) {
-                                dropdown.style.display = 'inline-block';
+                                dropdown.style.display = 'block';
                                 dropdown.disabled = false;
                                 dropdown.value = currentSelections.addons[addonId].variant;
                                 // If it's a price dropdown, ensure price is correct
