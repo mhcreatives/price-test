@@ -107,6 +107,18 @@
         .notification { position: fixed; top: 20px; right: 20px; background-color: #333333; color: white; padding: 10px 16px; border-radius: 4px; font-size: 0.85rem; opacity: 0; transform: translateY(-10px); transition: opacity 0.3s, transform 0.3s; z-index: 1000; }
         .notification.show { opacity: 1; transform: translateY(0); }
         .section-divider { height: 1px; background-color: #e0e0e0; margin: 20px 0; }
+        /* Tab navigation */
+        .tab-nav { display: flex; gap: 0; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; }
+        .tab-btn { padding: 8px 20px; border: none; background: none; cursor: pointer; font-size: 0.95rem; font-weight: 500; color: #999; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .tab-btn:hover { color: #666; }
+        .tab-btn.active { color: #333; border-bottom-color: #333; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        /* Souvenir items */
+        .souvenir-item { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9; margin-bottom: 10px; }
+        .souvenir-name { font-weight: 500; font-size: 0.9rem; min-width: 120px; }
+        .souvenir-qty { width: 70px; padding: 4px 6px; border: 1px solid #cccccc; border-radius: 3px; font-size: 0.85rem; text-align: center; }
+        .souvenir-total { font-weight: 600; font-size: 0.9rem; color: #333; min-width: 70px; text-align: right; }
         /* Mobile floating price bar */
         .mobile-price-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #333333; color: white; padding: 10px 16px; z-index: 999; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); justify-content: space-between; align-items: center; font-size: 0.9rem; }
         .mobile-price-bar .bar-price { font-size: 1.1rem; font-weight: 600; }
@@ -119,6 +131,11 @@
         <header><h1>Invitation Price Calculator</h1></header>
         <div class="calculator-wrapper">
             <div class="options-panel">
+                <div class="tab-nav">
+                    <button class="tab-btn active" onclick="switchTab('invitation')">Invitation</button>
+                    <button class="tab-btn" onclick="switchTab('souvenir')">Souvenir</button>
+                </div>
+                <div class="tab-panel active" id="tab-invitation">
                 <h2 class="section-title">Customization Options</h2>
                 <div class="option-group">
                     <label class="option-label">1. Event Type</label>
@@ -351,6 +368,11 @@
                     <button class="action-button reset-button" id="reset-button"><i class="fas fa-redo-alt"></i> Reset All</button>
                     <button class="action-button" id="print-button"><i class="fas fa-print"></i> Print</button>
                 </div>
+            </div><!-- /tab-invitation -->
+            <div class="tab-panel" id="tab-souvenir">
+                <h2 class="section-title">Souvenir Options</h2>
+                <div id="souvenir-items"></div>
+            </div><!-- /tab-souvenir -->
             </div>
             <div class="result-panel">
                 <div class="summary-container">
@@ -367,6 +389,7 @@
                         <div class="summary-line" id="summary-seal-line">No seal</div>
                         <div class="addons-summary" id="addons-summary"></div>
                         <div class="one-time-fees" id="one-time-fees"></div>
+                        <div class="one-time-fees" id="souvenir-breakdown" style="display:none;"></div>
                         <div class="sets-total" id="sets-total">20 sets x ₱25 each = ₱500</div>
                     </div>
                     <div class="final-total" id="final-total">Total: ₱500</div>
@@ -468,6 +491,137 @@
             'mindanao': 'Mindanao'
         };
         
+        // === Tab switching ===
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick*="${tab}"]`).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+        
+        // === Souvenir data ===
+        const souvenirData = [
+            {
+                id: 'money-envelope', name: 'Money Envelope', unit: 'piece',
+                options: [
+                    {label: 'Simple print', price: 10},
+                    {label: 'With QR', price: 15},
+                    {label: 'Light color', price: 15},
+                    {label: 'Dark color', price: 20}
+                ]
+            },
+            {
+                id: 'vow-cards', name: 'Vow Cards', unit: 'pair',
+                options: [
+                    {label: 'B&W Folded card only', price: 60},
+                    {label: 'B&W With insert', price: 70},
+                    {label: 'B&W Card only with ribbon', price: 80},
+                    {label: 'B&W With insert and ribbon', price: 90},
+                    {label: 'Colored Folded card only', price: 90},
+                    {label: 'Colored With insert', price: 100},
+                    {label: 'Colored Card only with ribbon', price: 110},
+                    {label: 'Colored With insert and ribbon', price: 120},
+                    {label: 'B2B Cover Print Folded card only', price: 120},
+                    {label: 'B2B Cover Print With insert', price: 130},
+                    {label: 'B2B Cover Print Card only with ribbon', price: 140},
+                    {label: 'B2B Cover Print With insert and ribbon', price: 150}
+                ]
+            },
+            {
+                id: 'gift-tag', name: 'Gift Tag', unit: 'piece',
+                options: [
+                    {label: 'No hole', price: 5},
+                    {label: 'With hole', price: 5},
+                    {label: 'With string', price: 8},
+                    {label: 'With eyelet', price: 10},
+                    {label: 'With eyelet and string', price: 13}
+                ]
+            }
+        ];
+        
+        // Current souvenir selections: { id: { variant, price, qty } }
+        let currentSouvenirs = {};
+        
+        function renderSouvenirs() {
+            const container = document.getElementById('souvenir-items');
+            container.innerHTML = '';
+            souvenirData.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'souvenir-item';
+                const opts = s.options.map(o => `<option value="${o.label}" data-price="${o.price}">${o.label} — ₱${o.price}/${s.unit}</option>`).join('');
+                const saved = currentSouvenirs[s.id];
+                item.innerHTML = `
+                    <span class="souvenir-name">${s.name}</span>
+                    <select class="select-input" id="souv-${s.id}" style="flex:1; min-width:200px; height:32px; font-size:0.85rem;" onchange="updateSouvenir('${s.id}')">
+                        <option value="">— Select —</option>
+                        ${opts}
+                    </select>
+                    <span style="font-size:0.85rem;">Qty:</span>
+                    <input type="number" class="souvenir-qty" id="souv-qty-${s.id}" min="0" value="${saved ? saved.qty : 0}" onchange="updateSouvenir('${s.id}')" oninput="this.value = Math.max(0, parseInt(this.value) || 0)">
+                    <span class="souvenir-total" id="souv-total-${s.id}">₱0</span>
+                `;
+                container.appendChild(item);
+                if (saved) {
+                    document.getElementById('souv-' + s.id).value = saved.variant;
+                }
+            });
+            recalcSouvenirs();
+        }
+        
+        function updateSouvenir(id) {
+            const sel = document.getElementById('souv-' + id);
+            const qty = parseInt(document.getElementById('souv-qty-' + id).value) || 0;
+            if (sel.value && qty > 0) {
+                const price = parseInt(sel.options[sel.selectedIndex].getAttribute('data-price'));
+                currentSouvenirs[id] = { variant: sel.value, price: price, qty: qty };
+            } else {
+                delete currentSouvenirs[id];
+            }
+            recalcSouvenirs();
+            updateSummary();
+            saveToLocalStorage();
+        }
+        
+        function recalcSouvenirs() {
+            let total = 0;
+            souvenirData.forEach(s => {
+                const saved = currentSouvenirs[s.id];
+                const totalEl = document.getElementById('souv-total-' + s.id);
+                if (saved && saved.qty > 0) {
+                    const sub = saved.price * saved.qty;
+                    totalEl.textContent = '₱' + sub;
+                    total += sub;
+                } else {
+                    totalEl.textContent = '₱0';
+                }
+            });
+            return total;
+        }
+        
+        function getSouvenirBreakdown() {
+            let html = '';
+            Object.keys(currentSouvenirs).forEach(id => {
+                const s = currentSouvenirs[id];
+                if (s.qty > 0) {
+                    const item = souvenirData.find(d => d.id === id);
+                    html += `<div class="summary-line">${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ₱${s.price * s.qty}</div>`;
+                }
+            });
+            return html;
+        }
+        
+        function getSouvenirCopyText() {
+            let text = '';
+            Object.keys(currentSouvenirs).forEach(id => {
+                const s = currentSouvenirs[id];
+                if (s.qty > 0) {
+                    const item = souvenirData.find(d => d.id === id);
+                    text += `${s.qty} ${item.unit}${s.qty > 1 ? 's' : ''} ${s.variant} ${item.name}: ₱${s.price * s.qty}\n`;
+                }
+            });
+            return text;
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('current-year').textContent = new Date().getFullYear();
             
@@ -483,6 +637,9 @@
             
             // Initialize add-ons
             initializeAddons();
+            
+            // Initialize souvenir items
+            renderSouvenirs();
             
            document.getElementById('envelope-checkbox').addEventListener('change', function() {
                 currentSelections.envelope.custom = this.checked;
@@ -945,7 +1102,8 @@
             }
             
             
-            const finalTotal = setsTotal + oneTimeFeesTotal;
+            const souvenirTotal = recalcSouvenirs();
+            const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal;
             
             // Update display
             document.getElementById('price-per-set').textContent = `₱${totalPerSet} each`;
@@ -975,6 +1133,17 @@
             }
             
             document.getElementById('final-total').innerHTML = `Total: ₱${finalTotal}`;
+            
+            // Update souvenir breakdown in summary
+            const souvenirBreakdown = getSouvenirBreakdown();
+            const souvenirEl = document.getElementById('souvenir-breakdown');
+            if (souvenirBreakdown) {
+                souvenirEl.innerHTML = souvenirBreakdown;
+                souvenirEl.style.display = 'block';
+            } else {
+                souvenirEl.innerHTML = '';
+                souvenirEl.style.display = 'none';
+            }
             
             // Update payment methods section
             updatePaymentMethods(finalTotal, setsTotal, oneTimeFeesTotal, payableSets, freeSets);
@@ -1076,7 +1245,8 @@
             const saveData = {
                 currentSelections: currentSelections,
                 numberOfSets: numberOfSets,
-                eventDate: eventDate
+                eventDate: eventDate,
+                currentSouvenirs: currentSouvenirs
             };
             localStorage.setItem('invitationCalculatorData', JSON.stringify(saveData));
         }
@@ -1092,6 +1262,9 @@
                         const oldIds = ['gold-foil', 'silver-foil', 'rosegold-foil', 'gold-foil-full-page', 'silver-foil-full-page', 'rosegold-foil-full-page', 'glossy-phototop', 'matte-phototop', 'leather-phototop', 'glitter-phototop', 'website-RSVP'];
                         oldIds.forEach(id => delete data.currentSelections.addons[id]);
                     }
+                    
+                    // Restore souvenirs
+                    if (data.currentSouvenirs) currentSouvenirs = data.currentSouvenirs;
                     
                     // Restore basic data
                     if (data.numberOfSets) numberOfSets = data.numberOfSets;
@@ -1331,6 +1504,10 @@
             // Clear localStorage
             localStorage.removeItem('invitationCalculatorData');
             
+            // Clear souvenirs
+            currentSouvenirs = {};
+            renderSouvenirs();
+            
             updateSummary();
         }
         
@@ -1555,7 +1732,8 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     
     
-    const finalTotal = setsTotal + oneTimeFeesTotal;
+    const souvenirTotal = recalcSouvenirs();
+    const finalTotal = setsTotal + oneTimeFeesTotal + souvenirTotal;
     
     // Calculate payment details - NEW LOGIC: For direct shipping, subtract free sets from total
     const shippingFee = calculateShippingFee(finalTotal);
@@ -1618,6 +1796,12 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     if (oneTimeFeesText.trim()) {
         // Add a single newline before the layout/rush info
         quotationText += `\n${oneTimeFeesText.trim()}`;
+    }
+    
+    // Add souvenir items
+    const souvenirText = getSouvenirCopyText();
+    if (souvenirText) {
+        quotationText += `\n\n${souvenirText.trim()}`;
     }
     
     quotationText += `\n\nTotal: ₱${finalTotal}`;
@@ -1772,6 +1956,9 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     document.getElementById('event-date-input').value = "";
     eventDate = "";
     updateEventDateDisplay();
+    
+    currentSouvenirs = {};
+    renderSouvenirs();
     
     updateSummary();
 }
