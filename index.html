@@ -139,9 +139,6 @@
                 </div>
                 <div class="tab-panel active" id="tab-invitation">
                 <h2 class="section-title">Customization Options</h2>
-                <div class="discount-checkbox-row" style="margin-bottom:12px;">
-                    <div class="discount-checkbox"><input type="checkbox" id="passport-only-mode"><label for="passport-only-mode">Passport invitation only (hide invitation breakdown)</label></div>
-                </div>
                 <div class="option-group">
                     <label class="option-label">1. Event Type</label>
                     <div class="event-option-grid" id="event-type-options">
@@ -380,6 +377,9 @@
                     <div class="discount-checkbox"><input type="checkbox" id="passport-enabled"><label for="passport-enabled">Include passport invitation</label></div>
                 </div>
                 <div id="passport-options-content" style="display:none;">
+                <div class="discount-checkbox-row" style="margin-bottom:8px;">
+                    <div class="discount-checkbox"><input type="checkbox" id="passport-only-mode"><label for="passport-only-mode">Passport invitation only (hide invitation breakdown)</label></div>
+                </div>
                 <div class="option-group">
                     <label class="option-label">Type</label>
                     <div class="option-grid" id="passport-type-options">
@@ -416,6 +416,12 @@
                 <div class="input-group">
                     <label class="input-label">Passport Quantity</label>
                     <input type="number" class="text-input" id="passport-sets-input" min="1" max="1000" value="20" oninput="this.value = Math.max(1, parseInt(this.value) || 1)">
+                </div>
+                <div class="option-group">
+                    <label class="option-label">Layout</label>
+                    <div class="layout-rush-row">
+                        <div class="layout-rush-checkbox"><input type="checkbox" id="passport-layout-checkbox"><label for="passport-layout-checkbox">Layout Required</label></div>
+                    </div>
                 </div>
                 <div class="option-group" id="passport-ribbon-group" style="display:none;">
                     <label class="option-label">Ribbon (included with holder)</label>
@@ -501,7 +507,7 @@
             { id: 'frosted-insert', name: 'Frosted insert', price: 15, unit: 'page' },
             { id: 'different-sized-insert', name: 'Different sized insert', price: 5, unit: 'flat' },
             { id: 'back-to-back-print', name: 'Back to back print', price: 5, unit: 'page' },
-            { id: 'ribbon-addon', name: 'Ribbon', price: 10, unit: 'flat', dropdown: ['Silver Grey', 'Gold', 'Rosegold', 'White', 'Black', 'Navy Blue', 'Dusty Blue', 'Blush Pink', 'Sage Green', 'Burgundy'] },
+            { id: 'ribbon-addon', name: 'Ribbon', price: 10, unit: 'flat', dropdown: ['Gold','Green','Copper','White','Blue','Torquoise','Emerald Green','Fiery red','Wine red','Pastel Purple','Very Light Purple','Marbled Lilac','Rust','Red','Dusty Pink','Middle Green','Ivory','Grass green','Pomelo','Black','Sage green','Aurora green','Amethyst','Powder blue','Mauvelous Pink','Yellow Gold','Midnight Blue','Rosegold','Maroon','Old Rose','Royal blue','Navy Blue','Silver','Champagne gold','Champagne','Pink','Dark Brown','Light blue','Olive green','Cream','Forest green','Dusty blue','Light pink','Aqua blue','Medium pink','Avocado green','Brown','Burgundy','Blush pink','Lavender','Cerulean','Teal green','Silver Grey','Copper Rust','Red Maroon','Aquamarine'] },
             { id: 'sticker-seal-addon', name: 'Sticker seal', price: 3, unit: 'flat' },
             { id: 'eyelet', name: 'Eyelet', price: 10, unit: 'piece' },
             { id: 'phototop', name: 'Phototop', unit: 'page', dropdown: [
@@ -691,7 +697,7 @@
         let passportOnlyMode = false;
         let passportSets = 20;
         
-        const passportRibbons = ['Silver Grey', 'Gold', 'Rosegold', 'White', 'Black', 'Navy Blue', 'Dusty Blue', 'Blush Pink', 'Sage Green', 'Burgundy'];
+        const passportRibbons = ['Gold','Green','Copper','White','Blue','Torquoise','Emerald Green','Fiery red','Wine red','Pastel Purple','Very Light Purple','Marbled Lilac','Rust','Red','Dusty Pink','Middle Green','Ivory','Grass green','Pomelo','Black','Sage green','Aurora green','Amethyst','Powder blue','Mauvelous Pink','Yellow Gold','Midnight Blue','Rosegold','Maroon','Old Rose','Royal blue','Navy Blue','Silver','Champagne gold','Champagne','Pink','Dark Brown','Light blue','Olive green','Cream','Forest green','Dusty blue','Light pink','Aqua blue','Medium pink','Avocado green','Brown','Burgundy','Blush pink','Lavender','Cerulean','Teal green','Silver Grey','Copper Rust','Red Maroon','Aquamarine'];
         
         function setupPassport() {
             // Enable/disable toggle
@@ -744,6 +750,12 @@
             document.getElementById('passport-sets-input').addEventListener('input', function() {
                 passportSets = Math.max(1, parseInt(this.value) || 1);
                 passportSelection.sets = passportSets;
+                updatePassportSummary();
+                saveToLocalStorage();
+            });
+            
+            // Layout checkbox
+            document.getElementById('passport-layout-checkbox').addEventListener('change', function() {
                 updatePassportSummary();
                 saveToLocalStorage();
             });
@@ -841,8 +853,20 @@
             const perSet = passportSelection.basePrice + passportSelection.paperPrice + passportSelection.leafExtra;
             const setsTotal = perSet * (passportSets || numberOfSets);
             // Layout fee: 100 + 100 * (cover 2 + insert leaves)
-            const layoutFee = 100 + (100 * (2 + passportSelection.leaves));
-            return { perSet, setsTotal, layoutFee, grandTotal: setsTotal + layoutFee };
+            const baseLayoutFee = 100 + (100 * (2 + passportSelection.leaves));
+            const layoutRequired = document.getElementById('passport-layout-checkbox').checked;
+            let layoutFee = 0;
+            let layoutLabel = '';
+            if (layoutRequired) {
+                layoutFee = baseLayoutFee;
+                layoutLabel = 'Layout fee';
+            } else if ((passportSets || numberOfSets) >= 20) {
+                layoutLabel = 'FREE layout';
+            } else {
+                layoutFee = baseLayoutFee;
+                layoutLabel = 'Layout fee';
+            }
+            return { perSet, setsTotal, layoutFee, grandTotal: setsTotal + layoutFee, layoutLabel, baseLayoutFee };
         }
         
         function getPassportBreakdown() {
@@ -856,7 +880,7 @@
             html += `<div class="summary-line">${passportSelection.leaves} leaves</div>`;
             if (passportSelection.ribbon && passportSelection.type === 'passport-holder') html += `<div class="summary-line">${passportSelection.ribbon} Ribbon</div>`;
             html += `<div style="margin-top: 6px; font-weight: 600;">${passportSets} sets x ₱${t.perSet} each = ₱${t.setsTotal}</div>`;
-            html += `<div class="summary-line">Layout fee: ₱${t.layoutFee}</div>`;
+            html += `<div class="summary-line">${t.layoutLabel}${t.layoutFee > 0 ? ': ₱' + t.layoutFee : ''}</div>`;
             html += `<div style="font-weight: 600;">Passport Total: ₱${t.grandTotal}</div>`;
             return html;
         }
@@ -873,7 +897,7 @@
             text += `${passportSelection.leaves} leaves\n`;
             if (passportSelection.ribbon && passportSelection.type === 'passport-holder') text += `${passportSelection.ribbon} Ribbon\n`;
             text += `\n${passportSets} sets x ₱${t.perSet} each = ₱${t.setsTotal}\n`;
-            text += `Layout fee: ₱${t.layoutFee}\n\n`;
+            text += `${t.layoutLabel}${t.layoutFee > 0 ? ': ₱' + t.layoutFee : ''}\n\n`;
             text += `Passport Total: ₱${t.grandTotal}`;
             return text;
         }
@@ -903,6 +927,12 @@
             // Passport-only mode toggle
             document.getElementById('passport-only-mode').addEventListener('change', function() {
                 passportOnlyMode = this.checked;
+                if (this.checked && !passportSelection.enabled) {
+                    // Auto-enable passport when passport-only is checked
+                    document.getElementById('passport-enabled').checked = true;
+                    passportSelection.enabled = true;
+                    document.getElementById('passport-options-content').style.display = 'block';
+                }
                 updateSummary();
                 saveToLocalStorage();
             });
