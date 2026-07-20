@@ -328,24 +328,13 @@
                     <div class="layout-rush-row">
                         <div class="layout-rush-checkbox"><input type="checkbox" id="rush-checkbox"><label for="rush-checkbox">Rush Order</label></div>
                         <select class="select-input" id="rush-type">
-                            <option value="7">7 days production</option>
-                            <option value="3">3 days production</option>
-                            <option value="1">1 day production</option>
+                            <option value="7">7 days</option>
+                            <option value="3">3 days</option>
+                            <option value="1">1 day</option>
                         </select>
                     </div>
                     <div class="discount-checkbox-row">
                         <div class="discount-checkbox"><input type="checkbox" id="discount-checkbox"><label for="discount-checkbox">Discount (Remove free sets, pay less but receive same quantity)</label></div>
-                    </div>
-                </div>
-                
-                <!-- Payment Method Section -->
-                <div class="option-group">
-                    <label class="option-label">Payment Method</label>
-                    <div class="option-grid" id="payment-method-options">
-                        <div class="option-card" data-value="none"><div class="option-name">Show All</div></div>
-                        <div class="option-card selected" data-value="direct-shipping"><div class="option-name">Direct shipping</div></div>
-                        <div class="option-card" data-value="shopee-checkout"><div class="option-name">Shopee checkout</div></div>
-                        <div class="option-card" data-value="shopee-checkout-full"><div class="option-name">Shopee checkout full payment</div></div>
                     </div>
                 </div>
                 
@@ -452,7 +441,6 @@
                     <h2 class="section-title">Quotation Summary</h2>
                     <div class="event-type-title" id="event-type-title">Wedding invitation</div>
                     <div class="event-date-line" id="event-date-display"></div>
-                    <div class="payment-method-line" id="payment-method-display"></div>
                     <div class="price-per-set" id="price-per-set">₱25 each</div>
                     <div class="summary-details">
                         <div class="summary-line" id="summary-size-line">4R size</div>
@@ -946,7 +934,6 @@
             setupOptionCards('envelope-options', 'envelope');
             setupOptionCards('paper-options', 'paper');
             setupOptionCards('seal-options', 'seal');
-            setupOptionCards('payment-method-options', 'paymentMethod', false, true);
             
             // Initialize add-ons
             initializeAddons();
@@ -1353,7 +1340,7 @@
                 const rates = {7: 10, 3: 15, 1: 20};
                 const perSet = rates[days] || 10;
                 rushFee = 100 + (perSet * numberOfSets);
-                rushSummary = `${days} days production: ₱${rushFee}`;
+                rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
             }
             
             // Calculate price per set (including flat add-ons except Map layout)
@@ -1386,7 +1373,7 @@
             let freeSets = 0;
             
             // Apply discount logic - for both direct-shipping and show all
-			if (currentSelections.discount && (currentSelections.paymentMethod === "direct-shipping" || currentSelections.paymentMethod === "none")) {
+			if (currentSelections.discount) {
 				// Calculate free sets but don't give them for free, instead reduce payable sets
 				freeSets = calculateFreeSetsForDirectShipping(numberOfSets);
 				payableSets = numberOfSets - freeSets;
@@ -1504,7 +1491,7 @@
             document.getElementById('mobile-bar-sets').textContent = `${numberOfSets} sets`;
             
             // Toggle invitation breakdown visibility for passport-only mode
-            const inviEls = document.querySelectorAll('#event-type-title, #event-date-display, #payment-method-display, #price-per-set, #summary-size-line, #summary-envelope-line, #summary-inserts-line, #summary-paper-line, #summary-seal-line, #addons-summary, #one-time-fees, #sets-total');
+            const inviEls = document.querySelectorAll('#event-type-title, #event-date-display, #price-per-set, #summary-size-line, #summary-envelope-line, #summary-inserts-line, #summary-paper-line, #summary-seal-line, #addons-summary, #one-time-fees, #sets-total');
             inviEls.forEach(el => el.style.display = passportOnlyMode ? 'none' : '');
             document.getElementById('addons-summary').style.display = passportOnlyMode ? 'none' : '';
         }
@@ -1517,72 +1504,24 @@
             const courierLabel = courierNames[courier] || 'SPX';
             const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} (${courierLabel})` : 'FREE Shipping';
             
-            // Calculate free sets for display (for non-discount case)
             const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
             
             let paymentMethodsHTML = '';
-            
-            // Calculate downpayment (50% of final total including shipping)
             const downpayment = roundToWholeNumber(finalTotal / 2);
             const balance = finalTotal - downpayment;
-            const shopeeCOD = roundToWholeNumber(balance * 1.15); // 15% additional for COD
             
-            // Show payment methods based on selection
-            if (currentSelections.paymentMethod === "none") {
-                // Show both Direct Shipping and Shopee Checkout
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Direct shipping</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            Balance before ship out: ₱${balance}<br>
-                            ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                            ${shippingLabel}
-                        </div>
+            // Direct shipping only
+            paymentMethodsHTML += `
+                <div class="payment-method-option">
+                    <div class="payment-method-title">Direct shipping</div>
+                    <div class="payment-method-details">
+                        Downpayment: ₱${downpayment}<br>
+                        Balance before ship out: ₱${balance}<br>
+                        ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
+                        ${shippingLabel}
                     </div>
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Shopee Checkout (15% add)</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            COD: ₱${shopeeCOD} ${shippingFee > 0 ? `+ shipping fee` : ''}
-                        </div>
-                    </div>
-                `;
-            } else if (currentSelections.paymentMethod === "direct-shipping") {
-                // Show only Direct Shipping
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Direct shipping</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            Balance before ship out: ₱${balance}<br>
-                            ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                            ${shippingLabel}
-                        </div>
-                    </div>
-                `;
-            } else if (currentSelections.paymentMethod === "shopee-checkout") {
-                // Show only Shopee Checkout (COD)
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Shopee Checkout (15% add)</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            COD: ₱${shopeeCOD} ${shippingFee > 0 ? `+ shipping fee` : ''}
-                        </div>
-                    </div>
-                `;
-            } else if (currentSelections.paymentMethod === "shopee-checkout-full") {
-                // Show only Shopee Checkout Full Payment
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Shopee Checkout Full Payment</div>
-                        <div class="payment-method-details">
-                            Full Payment: ₱${finalTotal} ${shippingFee > 0 ? `+ shipping fee` : ''}
-                        </div>
-                    </div>
-                `;
-            }
+                </div>
+            `;
             
             // Add discount note if applicable
             if (currentSelections.discount && freeSets > 0) {
@@ -1734,16 +1673,6 @@
             // Update discount checkbox
             document.getElementById('discount-checkbox').checked = currentSelections.discount;
             
-            // Update payment method
-            const paymentMethodCards = document.querySelectorAll('#payment-method-options .option-card');
-            paymentMethodCards.forEach(card => {
-                if (card.getAttribute('data-value') === currentSelections.paymentMethod) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
-            
             // Update location
             document.getElementById('location-select').value = currentSelections.location;
             
@@ -1846,13 +1775,7 @@
 			currentSelections.layout = { required: false, type: "no-layout", pages: 1 };
 			currentSelections.rush = { required: false, type: "7" };
 			
-			// Reset payment method
-            const paymentMethodCards = document.querySelectorAll('#payment-method-options .option-card');
-            paymentMethodCards.forEach(card => card.classList.remove('selected'));
-            paymentMethodCards[0].classList.add('selected');
-            currentSelections.paymentMethod = "direct-shipping";
-            
-            // Reset location
+			// Reset location
             document.getElementById('location-select').value = "";
             currentSelections.location = "";
             document.getElementById('courier-select').value = "spx";
@@ -2013,7 +1936,7 @@ function copyQuotation() {
         const rates = {7: 10, 3: 15, 1: 20};
         const perSet = rates[days] || 10;
         rushFee = 100 + (perSet * numberOfSets);
-        rushSummary = `${days} days production: ₱${rushFee}`;
+        rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
     }
     
     // Calculate price per set (including flat add-ons except Map layout)
@@ -2113,7 +2036,6 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
     const downpayment = roundToWholeNumber(finalTotal / 2);
     const balance = finalTotal - downpayment;
-    const shopeeCOD = roundToWholeNumber(balance * 1.15); // 15% additional for COD
     
     const eventType = currentSelections.eventType.name;
     const eventTitle = eventType === "Special event" ? "Special event invitation" : `${eventType} invitation`;
@@ -2190,57 +2112,17 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     quotationText += `\n\nTotal: ₱${finalTotal}`;
     
-    // Add payment methods based on selection
-    quotationText += `\n\nPayment method`;
-    
-    if (currentSelections.paymentMethod === "none") {
-        // Show both Direct Shipping and Shopee Checkout
-        quotationText += `\n\nDirect shipping\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `Balance before ship out: ₱${balance}`;
-        if (displayFreeSets > 0) {
-            quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
-        }
-        if (shippingFee > 0) {
-            quotationText += `\n+ ₱${shippingFee} Shipping fee`;
-        } else {
-            quotationText += `\nFREE Shipping`;
-        }
-        
-        quotationText += `\n\nShopee Checkout (15% add)\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `COD: ₱${shopeeCOD}`;
-        if (shippingFee > 0) {
-            quotationText += ` + shipping fee`;
-        }
-    } else if (currentSelections.paymentMethod === "direct-shipping") {
-        // Show only Direct Shipping
-        quotationText += `\n\nDirect shipping\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `Balance before ship out: ₱${balance}`;
-        if (displayFreeSets > 0) {
-            quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
-        }
-        if (shippingFee > 0) {
-            quotationText += `\n+ ₱${shippingFee} Shipping fee`;
-        } else {
-            quotationText += `\nFREE Shipping`;
-        }
-    } else if (currentSelections.paymentMethod === "shopee-checkout") {
-        // Show only Shopee Checkout (COD)
-        quotationText += `\n\nShopee Checkout (15% add)\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `COD: ₱${shopeeCOD}`;
-        if (shippingFee > 0) {
-            quotationText += ` + shipping fee`;
-        }
-    } else if (currentSelections.paymentMethod === "shopee-checkout-full") {
-        // Show only Shopee Checkout Full Payment
-        quotationText += `\n\nShopee Checkout Full Payment\n\n`;
-        quotationText += `Full Payment: ₱${finalTotal}`;
-        if (shippingFee > 0) {
-            quotationText += ` + shipping fee`;
-        }
+    // Direct shipping payment
+    quotationText += `\n\nPayment method\n\nDirect shipping\n\n`;
+    quotationText += `Downpayment: ₱${downpayment}\n`;
+    quotationText += `Balance before ship out: ₱${balance}`;
+    if (displayFreeSets > 0) {
+        quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
+    }
+    if (shippingFee > 0) {
+        quotationText += `\n+ ₱${shippingFee} Shipping fee`;
+    } else {
+        quotationText += `\nFREE Shipping`;
     }
     
     // Add discount note if applicable
