@@ -324,12 +324,13 @@
                             <option value="own-layout">Own layout</option>
                         </select>
                     </div>
-                    <label class="option-label">Rush Fee</label>
+                    <label class="option-label">Rush Order</label>
                     <div class="layout-rush-row">
                         <div class="layout-rush-checkbox"><input type="checkbox" id="rush-checkbox"><label for="rush-checkbox">Rush Order</label></div>
                         <select class="select-input" id="rush-type">
-                            <option value="no-layout">No layout</option>
-                            <option value="own-layout">Own layout</option>
+                            <option value="7">7 days production</option>
+                            <option value="3">3 days production</option>
+                            <option value="1">1 day production</option>
                         </select>
                     </div>
                     <div class="discount-checkbox-row">
@@ -359,6 +360,15 @@
                         <option value="south-luzon">South Luzon</option>
                         <option value="visayas">Visayas</option>
                         <option value="mindanao">Mindanao</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <label class="option-label">Courier</label>
+                    <select class="select-input" id="courier-select">
+                        <option value="spx" selected>SPX Express (₱100)</option>
+                        <option value="jnt">J&T Express (₱150)</option>
+                        <option value="lbc">LBC (₱200)</option>
                     </select>
                 </div>
                 
@@ -484,11 +494,12 @@
             paper: { value: "matte", price: 0, name: "Matte" },
             seal: { value: "no-seal", price: 0, name: "No seal" },
             layout: { required: false, type: "no-layout", pages: 1 },
-            rush: { required: false, type: "no-layout" },
+            rush: { required: false, type: "7" },
             paymentMethod: "direct-shipping",
             addons: {},
             discount: false
         };
+        let courier = 'spx'; // spx, jnt, lbc
         let numberOfSets = 20;
         let eventDate = "";
         
@@ -519,14 +530,26 @@
             { id: 'folded-insert', name: 'Folded insert', price: 5, unit: 'flat' },
             { id: 'trifold-insert', name: 'Trifold insert', price: 10, unit: 'flat' },
             { id: 'liner', name: 'Liner', price: 20, unit: 'flat' },
-			{ id: 'decals', name: 'Decals', price: 15, unit: 'piece' },
+			{ id: 'decals', name: 'Decals', unit: 'piece', dropdown: [{label:'₱10',price:10},{label:'₱15',price:15},{label:'₱20',price:20},{label:'₱25',price:25},{label:'₱30',price:30}] },
 			{ id: 'foil', name: 'Foil', price: 15, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
 			{ id: 'foil-full-page', name: 'Foil full page', price: 20, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
-			{ id: 'envelope-print', name: 'Envelope print', price: 10, unit: 'flat' },
+			{ id: 'envelope-print', name: 'Envelope print', price: 10, unit: 'page' },
 			{ id: 'website', name: 'Website', unit: 'flat', dropdown: [
-			    {label: 'No RSVP', price: 599}, {label: 'With RSVP', price: 699}
+			    {label:'1 page — No RSVP', price:599}, {label:'1 page — With RSVP', price:699},
+			    {label:'2 pages — No RSVP', price:899}, {label:'2 pages — With RSVP', price:999}
 			]},
-			{ id: 'e-invite', name: 'E-invite', price: 100, unit: 'flat' }
+			{ id: 'e-invite', name: 'E-invite', price: 100, unit: 'flat' },
+			{ id: 'sketch', name: 'Sketch', unit: 'flat', dropdown: [{label:'₱50',price:50},{label:'₱100',price:100},{label:'₱150',price:150},{label:'₱200',price:200}] },
+			{ id: 'envelope-addon', name: 'Envelope add-on', unit: 'page', dropdown: [{label:'₱5',price:5},{label:'₱10',price:10},{label:'₱15',price:15},{label:'₱20',price:20},{label:'₱25',price:25},{label:'₱30',price:30},{label:'₱35',price:35},{label:'₱40',price:40},{label:'₱45',price:45},{label:'₱50',price:50}] },
+			{ id: 'monogram', name: 'Monogram', unit: 'flat', dropdown: [
+			    {label:'Simple design (letters only)', price:100},
+			    {label:'With custom design', price:150},
+			    {label:'With animated background', price:150},
+			    {label:'Custom + animated background', price:200},
+			    {label:'With graphics', price:200},
+			    {label:'With animated monogram/logo', price:200},
+			    {label:'All features', price:400}
+			]}
             
 
         ];
@@ -598,6 +621,13 @@
                     {label: 'With string', price: 8},
                     {label: 'With eyelet', price: 10},
                     {label: 'With eyelet and string', price: 13}
+                ]
+            },
+            {
+                id: 'wedding-fan', name: 'Wedding Fan', unit: 'piece',
+                options: [
+                    {label: 'Plain', price: 35},
+                    {label: 'Colored', price: 40}
                 ]
             }
         ];
@@ -1011,6 +1041,12 @@
                 saveToLocalStorage();
             });
             
+            document.getElementById('courier-select').addEventListener('change', function() {
+                courier = this.value;
+                updateSummary();
+                saveToLocalStorage();
+            });
+            
             document.getElementById('reset-button').addEventListener('click', resetSelections);
             document.getElementById('print-button').addEventListener('click', printQuote);
             document.getElementById('copy-button').addEventListener('click', copyQuotation);
@@ -1189,15 +1225,10 @@
         }
         
         function calculateShippingFee(totalAmount) {
-            // Base shipping rates
-            let baseFee = 0;
-            if (totalAmount >= 6000) {
-                baseFee = 0; // FREE shipping
-            } else if (totalAmount >= 3000) {
-                baseFee = 50; // ₱50 shipping
-            } else {
-                baseFee = 100; // ₱100 shipping
-            }
+            // Courier base prices
+            const courierPrices = { 'spx': 100, 'jnt': 150, 'lbc': 200 };
+            let baseFee = courierPrices[courier] || 100;
+            if (totalAmount >= 6000) baseFee = 0; // FREE shipping
             
             // Apply location multiplier
             const locationMultipliers = {
@@ -1306,13 +1337,11 @@
             let rushFee = 0;
             let rushSummary = "";
             if (currentSelections.rush.required) {
-                if (currentSelections.rush.type === "own-layout") {
-                    rushFee = 10 * numberOfSets;
-                    rushSummary = `Rush fee: ₱${rushFee}`;
-                } else if (currentSelections.rush.type === "no-layout") {
-                    rushFee = 100 + (10 * numberOfSets);
-                    rushSummary = `Rush fee: ₱${rushFee}`;
-                }
+                const days = parseInt(currentSelections.rush.type) || 7;
+                const rates = {7: 10, 3: 15, 1: 20};
+                const perSet = rates[days] || 10;
+                rushFee = 100 + (perSet * numberOfSets);
+                rushSummary = `${days} days production: ₱${rushFee}`;
             }
             
             // Calculate price per set (including flat add-ons except Map layout)
@@ -1472,6 +1501,9 @@
             const paymentMethodsSection = document.getElementById('payment-methods-section');
             const locationName = currentSelections.location ? locationNames[currentSelections.location] : '';
             const shippingFee = calculateShippingFee(finalTotal);
+            const courierNames = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC' };
+            const courierLabel = courierNames[courier] || 'SPX';
+            const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} (${courierLabel})` : 'FREE Shipping';
             
             // Calculate free sets for display (for non-discount case)
             const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
@@ -1493,7 +1525,7 @@
                             Downpayment: ₱${downpayment}<br>
                             Balance before ship out: ₱${balance}<br>
                             ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                            ${shippingFee > 0 ? `+ ₱${shippingFee} Shipping fee` : 'FREE Shipping'}
+                            ${shippingLabel}
                         </div>
                     </div>
                     <div class="payment-method-option">
@@ -1513,7 +1545,7 @@
                             Downpayment: ₱${downpayment}<br>
                             Balance before ship out: ₱${balance}<br>
                             ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                            ${shippingFee > 0 ? `+ ₱${shippingFee} Shipping fee` : 'FREE Shipping'}
+                            ${shippingLabel}
                         </div>
                     </div>
                 `;
@@ -1563,7 +1595,8 @@
                 currentSouvenirs: currentSouvenirs,
                 passportSelection: passportSelection,
                 passportOnlyMode: passportOnlyMode,
-                passportSets: passportSets
+                passportSets: passportSets,
+                courier: courier
             };
             localStorage.setItem('invitationCalculatorData', JSON.stringify(saveData));
         }
@@ -1587,6 +1620,7 @@
                     if (data.passportSelection) passportSelection = data.passportSelection;
                     if (data.passportOnlyMode !== undefined) { passportOnlyMode = data.passportOnlyMode; document.getElementById('passport-only-mode').checked = passportOnlyMode; }
                     if (data.passportSets) passportSets = data.passportSets;
+                    if (data.courier) { courier = data.courier; document.getElementById('courier-select').value = courier; }
                     
                     // Restore basic data
                     if (data.numberOfSets) numberOfSets = data.numberOfSets;
@@ -1788,17 +1822,17 @@
 			document.getElementById('layout-checkbox').checked = false;
             document.getElementById('layout-type').value = "no-layout";
             document.getElementById('rush-checkbox').checked = false;
-            document.getElementById('rush-type').value = "no-layout";
+            document.getElementById('rush-type').value = "7";
             document.getElementById('discount-checkbox').checked = false;
             currentSelections.layout = { required: false, type: "no-layout", pages: 1 };
-            currentSelections.rush = { required: false, type: "no-layout" };
+            currentSelections.rush = { required: false, type: "7" };
             currentSelections.discount = false;
             
             // Reset layout and rush dropdowns
 			document.getElementById('layout-type').value = "no-layout";
-			document.getElementById('rush-type').value = "no-layout";
+			document.getElementById('rush-type').value = "7";
 			currentSelections.layout = { required: false, type: "no-layout", pages: 1 };
-			currentSelections.rush = { required: false, type: "no-layout" };
+			currentSelections.rush = { required: false, type: "7" };
 			
 			// Reset payment method
             const paymentMethodCards = document.querySelectorAll('#payment-method-options .option-card');
@@ -1809,6 +1843,8 @@
             // Reset location
             document.getElementById('location-select').value = "";
             currentSelections.location = "";
+            document.getElementById('courier-select').value = "spx";
+            courier = "spx";
             
             document.getElementById('sets-input').value = 20;
             numberOfSets = 20;
@@ -1961,13 +1997,11 @@ function copyQuotation() {
     let rushFee = 0;
     let rushSummary = "";
     if (currentSelections.rush.required) {
-        if (currentSelections.rush.type === "own-layout") {
-            rushFee = 10 * numberOfSets;
-            rushSummary = `Rush fee: ₱${rushFee}`;
-        } else if (currentSelections.rush.type === "no-layout") {
-            rushFee = 100 + (10 * numberOfSets);
-            rushSummary = `Rush fee: ₱${rushFee}`;
-        }
+        const days = parseInt(currentSelections.rush.type) || 7;
+        const rates = {7: 10, 3: 15, 1: 20};
+        const perSet = rates[days] || 10;
+        rushFee = 100 + (perSet * numberOfSets);
+        rushSummary = `${days} days production: ₱${rushFee}`;
     }
     
     // Calculate price per set (including flat add-ons except Map layout)
@@ -2270,10 +2304,10 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     document.getElementById('layout-checkbox').checked = false;
     document.getElementById('layout-type').value = "no-layout";
     document.getElementById('rush-checkbox').checked = false;
-    document.getElementById('rush-type').value = "no-layout";
+    document.getElementById('rush-type').value = "7";
     document.getElementById('discount-checkbox').checked = false;
     currentSelections.layout = { required: false, type: "no-layout", pages: 1 };
-    currentSelections.rush = { required: false, type: "no-layout" };
+    currentSelections.rush = { required: false, type: "7" };
     currentSelections.discount = false;
     
     // Reset payment method
@@ -2285,6 +2319,8 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     // Reset location
     document.getElementById('location-select').value = "";
     currentSelections.location = "";
+    document.getElementById('courier-select').value = "spx";
+    courier = "spx";
     
     document.getElementById('sets-input').value = 20;
     numberOfSets = 20;
