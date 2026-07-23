@@ -912,7 +912,7 @@
         
         function getPassportCopyText() {
             const t = getPassportTotal();
-            if (!passportSelection.type || numberOfSets <= 0) return '';
+            if (!passportSelection.enabled || t.grandTotal <= 0) return '';
             let text = 'Passport invitation\n\n';
             text += `₱${t.perSet} each\n\n`;
             text += `${passportSelection.name}\n`;
@@ -2132,57 +2132,16 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     quotationText += `\n\nTotal: ₱${finalTotal}`;
     
-    // Add payment methods based on selection
-    quotationText += `\n\nPayment method`;
-    
-    if (currentSelections.paymentMethod === "none") {
-        // Show both Direct Shipping and Shopee Checkout
-        quotationText += `\n\nDirect shipping\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `Balance before ship out: ₱${balance}`;
-        if (displayFreeSets > 0) {
-            quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
-        }
-        if (shippingFee > 0) {
-            quotationText += `\n+ ₱${shippingFee} Shipping fee`;
-        } else {
-            quotationText += `\nFREE Shipping`;
-        }
-        
-        quotationText += `\n\nShopee Checkout (15% add)\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `COD: ₱${shopeeCOD}`;
-        if (shippingFee > 0) {
-            quotationText += ` + shipping fee`;
-        }
-    } else if (currentSelections.paymentMethod === "direct-shipping") {
-        // Show only Direct Shipping
-        quotationText += `\n\nDirect shipping\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `Balance before ship out: ₱${balance}`;
-        if (displayFreeSets > 0) {
-            quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
-        }
-        if (shippingFee > 0) {
-            quotationText += `\n+ ₱${shippingFee} Shipping fee`;
-        } else {
-            quotationText += `\nFREE Shipping`;
-        }
-    } else if (currentSelections.paymentMethod === "shopee-checkout") {
-        // Show only Shopee Checkout (COD)
-        quotationText += `\n\nShopee Checkout (15% add)\n\n`;
-        quotationText += `Downpayment: ₱${downpayment}\n`;
-        quotationText += `COD: ₱${shopeeCOD}`;
-        if (shippingFee > 0) {
-            quotationText += ` + shipping fee`;
-        }
-    } else if (currentSelections.paymentMethod === "shopee-checkout-full") {
-        // Show only Shopee Checkout Full Payment
-        quotationText += `\n\nShopee Checkout Full Payment\n\n`;
-        quotationText += `Full Payment: ₱${finalTotal}`;
-        if (shippingFee > 0) {
-            quotationText += ` + shipping fee`;
-        }
+    // Payment details (no header)
+    quotationText += `\n\nDownpayment: ₱${downpayment}`;
+    quotationText += `\nBalance before ship out: ₱${balance}`;
+    if (displayFreeSets > 0) {
+        quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
+    }
+    if (shippingFee > 0) {
+        quotationText += `\n+ ₱${shippingFee} Shipping fee`;
+    } else {
+        quotationText += `\nFREE Shipping`;
     }
     
     // Add discount note if applicable
