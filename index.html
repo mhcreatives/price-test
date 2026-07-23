@@ -63,7 +63,7 @@
         input[type="range"] { width: 100%; height: 6px; border-radius: 3px; background: #e0e0e0; outline: none; -webkit-appearance: none; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #333333; cursor: pointer; border: 1px solid #cccccc; }
         .input-group { margin-bottom: 15px; }
-        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-top: 15px; align-items: end; }
         .input-label { display: block; font-weight: 500; margin-bottom: 6px; color: #333333; font-size: 0.95rem; }
         .text-input, .date-input, .select-input { width: 100%; padding: 8px; border: 1px solid #cccccc; border-radius: 4px; font-size: 0.95rem; background-color: #ffffff; }
         .text-input:focus, .date-input:focus, .select-input:focus { outline: none; border-color: #666666; }
@@ -138,45 +138,52 @@
                     <button class="tab-btn" onclick="switchTab('souvenir')">Souvenir</button>
                 </div>
                 <div class="tab-panel active" id="tab-invitation">
-                <h2 class="section-title">Customization Options</h2>
-                <div class="option-group">
-                    <label class="option-label">1. Event Type</label>
-                    <div class="event-option-grid" id="event-type-options">
-                        <div class="option-card selected" data-value="wedding" data-price="0"><div class="option-name">Wedding</div></div>
-                        <div class="option-card" data-value="debut" data-price="0"><div class="option-name">Debut</div></div>
-                        <div class="option-card" data-value="birthday" data-price="0"><div class="option-name">Birthday</div></div>
-                        <div class="option-card" data-value="baptism" data-price="0"><div class="option-name">Baptism</div></div>
-                        <div class="option-card" data-value="special-event" data-price="0"><div class="option-name">Special event</div></div>
+                <div style="display:flex;gap:12px;">
+                    <div class="option-group" style="flex:1;">
+                        <label class="option-label">1. Event Type</label>
+                        <select class="select-input" id="event-type-select" style="height:40px;font-size:15px;width:100%;">
+                            <option value="wedding" data-price="0" selected>Wedding</option>
+                            <option value="debut" data-price="0">Debut</option>
+                            <option value="birthday" data-price="0">Birthday</option>
+                            <option value="baptism" data-price="0">Baptism</option>
+                            <option value="special-event" data-price="0">Special event</option>
+                        </select>
+                    </div>
+                    <div class="option-group" style="flex:1;"><label class="option-label">2. Size</label>
+                        <select class="select-input" id="size-select" style="height:40px;font-size:15px;width:100%;">
+                            <option value="4r" data-price="0" selected>4R</option>
+                            <option value="5r" data-price="10">5R</option>
+                        </select>
                     </div>
                 </div>
-                <div class="option-group"><label class="option-label">2. Size</label>
-                    <div class="option-grid" id="size-options">
-                        <div class="option-card selected" data-value="4r" data-price="0"><div class="option-name">4R</div></div>
-                        <div class="option-card" data-value="5r" data-price="10"><div class="option-name">5R</div></div>
-                    </div>
-                </div>
-                <div class="option-group"><label class="option-label">3. Envelope Type</label>
-                    <div class="option-grid" id="envelope-options">
-                        <div class="option-card" data-value="no-envelope" data-price="-5"><div class="option-name">No envelope</div></div>
-                        <div class="option-card selected" data-value="plain-white" data-price="0"><div class="option-name">Plain white</div></div>
-                        <div class="option-card" data-value="colored" data-price="15"><div class="option-name">Colored</div></div>
-                        <div class="option-card" data-value="transparent" data-price="15"><div class="option-name">Transparent</div></div>
-                        <div class="option-card" data-value="premium-colored" data-price="20"><div class="option-name">Premium colored</div></div>
-                        <div class="option-card" data-value="vellum-cover" data-price="20"><div class="option-name">Vellum cover</div></div>
-                        <div class="option-card" data-value="gatefold" data-price="40"><div class="option-name">Gatefold</div></div>
-                        <div class="option-card" data-value="pocket-cover" data-price="25"><div class="option-name">Pocket Cover</div></div>
-                        <div class="option-card" data-value="pouch-cover" data-price="55"><div class="option-name">Pouch Cover</div></div>
-                        <div class="option-card" data-value="trifold" data-price="45"><div class="option-name">Trifold</div></div>
-                        <div class="option-card" data-value="vellum-cover-print" data-price="30"><div class="option-name">Vellum cover with print</div></div>
-                        <div class="option-card" data-value="portrait-colored" data-price="35"><div class="option-name">Portrait colored</div></div>
-                        <div class="option-card" data-value="premium-portrait-colored" data-price="45"><div class="option-name">Premium portrait colored</div></div>
+                <div style="display:flex;gap:12px;">
+                    <div class="option-group" style="flex:1;"><label class="option-label">3. Envelope Type</label>
+                    <select class="select-input" id="envelope-select" style="height:40px;font-size:15px;width:100%;">
+                        <option value="no-envelope" data-price="-5">No envelope</option>
+                        <option value="plain-white" data-price="0" selected>Plain white</option>
+                        <option value="colored" data-price="15">Colored</option>
+                        <option value="transparent" data-price="15">Transparent</option>
+                        <option value="premium-colored" data-price="20">Premium colored</option>
+                        <option value="vellum-cover" data-price="20">Vellum cover</option>
+                        <option value="gatefold" data-price="40">Gatefold</option>
+                        <option value="pocket-cover" data-price="25">Pocket Cover</option>
+                        <option value="pouch-cover" data-price="55">Pouch Cover</option>
+                        <option value="trifold" data-price="45">Trifold</option>
+                        <option value="vellum-cover-print" data-price="30">Vellum cover with print</option>
+                        <option value="portrait-colored" data-price="35">Portrait colored</option>
+                        <option value="premium-portrait-colored" data-price="45">Premium portrait colored</option>
+                    </select></div>
+                    <div class="option-group" style="flex:1;"><label class="option-label">4. Number of Inserts</label>
+                    <div class="addon-option"><label>Inserts:</label><input type="number" class="addon-input" id="inserts-input" min="0" max="100" value="2" oninput="this.value = Math.max(0, parseInt(this.value) || 0)" style="width:120px;"></div>
                     </div>
                 </div>
   
-				<input type="checkbox" id="envelope-checkbox" style="vertical-align: middle;">
-				<label for="envelope-checkbox" ></label style="vertical-align: middle; margin-right: 10px;">
-				<select class="select-input" id="color-select" style="vertical-align: middle; height: 40px; width: 160px; font-size: 15px; margin-right: 10px;">
-					<option value="">Select color</option>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:4px;">
+                        <input type="checkbox" id="envelope-checkbox" style="vertical-align: middle;">
+                        <label for="envelope-checkbox"></label>
+                        <select class="select-input" id="color-select" style="height:40px;width:160px;font-size:15px;">
+                            <option value="">Select color</option>
 					<option value="Amethyst">Amethyst</option>
 					<option value="Asea 44">Asea 44</option>
 					<option value="Apple green">Apple green</option>
@@ -259,115 +266,115 @@
 					<option value="Glossy">Glossy</option>
 					<option value="Textured">Textured</option>
 				</select>
-
-			
-                <div class="option-group"><label class="option-label">4. Number of Inserts</label>
-                    <div class="addon-option"><label>Inserts:</label><input type="number" class="addon-input" id="inserts-input" min="0" max="100" value="2" oninput="this.value = Math.max(0, parseInt(this.value) || 0)"></div>
-                </div>
-                <div class="option-group"><label class="option-label">5. Paper Type</label>
-                    <div class="option-grid" id="paper-options">
-                        <div class="option-card selected" data-value="matte" data-price="0"><div class="option-name">Matte</div></div>
-                        <div class="option-card" data-value="glossy" data-price="0"><div class="option-name">Glossy</div></div>
-                        <div class="option-card" data-value="premium-matte" data-price="5"><div class="option-name">Premium matte</div></div>
-                        <div class="option-card" data-value="matte-textured" data-price="5"><div class="option-name">Matte textured</div></div>
-                        <div class="option-card" data-value="glossy-textured" data-price="5"><div class="option-name">Glossy textured</div></div>
                     </div>
                 </div>
-                <div class="option-group"><label class="option-label">6. Envelope Seal</label>
-                    <div class="option-grid" id="seal-options">
-                        <div class="option-card selected" data-value="no-seal" data-price="0"><div class="option-name">No seal</div></div>
-                        <div class="option-card" data-value="sticker-seal" data-price="0"><div class="option-name">Sticker seal</div></div>
-                        <div class="option-card" data-value="wax-seal" data-price="5"><div class="option-name">Wax seal</div></div>
-                        <div class="option-card" data-value="belt" data-price="5"><div class="option-name">Belt</div></div>
-                        <div class="option-card" data-value="wax-seal-string" data-price="10"><div class="option-name">Wax seal with string</div></div>
-                        <div class="option-card" data-value="belt-print" data-price="10"><div class="option-name">Belt with print</div></div>
-                        <div class="option-card" data-value="frosted-belt" data-price="10"><div class="option-name">Frosted belt</div></div>
-                        <div class="option-card" data-value="ribbon" data-price="10"><div class="option-name">Ribbon</div></div>
-                        <div class="option-card" data-value="printed-tag" data-price="0"><div class="option-name">Printed tag</div></div>
-                        <div class="option-card" data-value="jute-string" data-price="5"><div class="option-name">Jute string</div></div>
-                        <div class="option-card" data-value="wax-seal-flower" data-price="15"><div class="option-name">Wax seal with flower</div></div>
-                        <div class="option-card" data-value="frosted-belt-print" data-price="15"><div class="option-name">Frosted belt with print</div></div>
-                        <div class="option-card" data-value="frayed-ribbon" data-price="15"><div class="option-name">Frayed ribbon</div></div>
-                        <div class="option-card" data-value="wax-seal-string-flower" data-price="20"><div class="option-name">Wax seal with string and flower</div></div>
-                    </div>
+                <div style="display:flex;gap:12px;">
+                    <div class="option-group" style="flex:1;"><label class="option-label">5. Paper Type</label>
+                    <select class="select-input" id="paper-select" style="height:40px;font-size:15px;width:100%;">
+                        <option value="matte" data-price="0" selected>Matte</option>
+                        <option value="glossy" data-price="0">Glossy</option>
+                        <option value="premium-matte" data-price="5">Premium matte</option>
+                        <option value="matte-textured" data-price="5">Matte textured</option>
+                        <option value="glossy-textured" data-price="5">Glossy textured</option>
+                    </select></div>
+                    <div class="option-group" style="flex:1;"><label class="option-label">6. Envelope Seal</label>
+                    <select class="select-input" id="seal-select" style="height:40px;font-size:15px;width:100%;">
+                        <option value="no-seal" data-price="0" selected>No seal</option>
+                        <option value="sticker-seal" data-price="0">Sticker seal</option>
+                        <option value="wax-seal" data-price="5">Wax seal</option>
+                        <option value="belt" data-price="5">Belt</option>
+                        <option value="wax-seal-string" data-price="10">Wax seal with string</option>
+                        <option value="belt-print" data-price="10">Belt with print</option>
+                        <option value="frosted-belt" data-price="10">Frosted belt</option>
+                        <option value="ribbon" data-price="10">Ribbon</option>
+                        <option value="printed-tag" data-price="0">Printed tag</option>
+                        <option value="jute-string" data-price="5">Jute string</option>
+                        <option value="wax-seal-flower" data-price="15">Wax seal with flower</option>
+                        <option value="frosted-belt-print" data-price="15">Frosted belt with print</option>
+                        <option value="frayed-ribbon" data-price="15">Frayed ribbon</option>
+                        <option value="wax-seal-string-flower" data-price="20">Wax seal with string and flower</option>
+                    </select></div>
                 </div>
                 
                 <!-- Add-ons Section -->
                 <div class="option-group">
                     <label class="option-label">7. Add-ons</label>
-                    <div class="addon-grid" id="addons-grid">
-                        <!-- Add-ons will be added here by JavaScript -->
-                    </div>
-                </div>
-                
-                <div class="section-divider"></div>
-				<div class="option-group">
-					<label class="option-label">Import Quotation</label>
-					<div style="margin-bottom: 8px; font-size: 0.85rem; color: #666;">
-					</div>
-					<textarea class="text-input" id="import-textarea" rows="4" placeholder="Paste quotation text here..."></textarea>
-					<button class="action-button" id="import-button" style="margin-top: 10px; width: 100%;">
-						<i class="fas fa-file-import"></i> Import Quotation
-					</button>
-				</div>
-				<div class="section-divider"></div>
-				<h2 class="section-title">Customization Options</h2>
-                
-                <!-- Layout & Rush Section -->
-                <h2 class="section-title">Order Details</h2>
-                <div class="layout-rush-section">
-                    <label class="option-label">Layout Selection</label>
-                    <div class="layout-rush-row">
-                        <div class="layout-rush-checkbox"><input type="checkbox" id="layout-checkbox"><label for="layout-checkbox">Layout Required</label></div>
-                        <select class="select-input" id="layout-type">
-                            <option value="no-layout">No layout</option>
-                            <option value="own-layout">Own layout</option>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <select class="select-input" id="addon-picker" style="flex:1;height:40px;font-size:15px;">
+                            <option value="">— Select add-on —</option>
                         </select>
+                        <button class="action-button" id="add-addon-button" style="padding:8px 16px;white-space:nowrap;">+ Add</button>
                     </div>
-                    <label class="option-label">Rush Order</label>
-                    <div class="layout-rush-row">
-                        <div class="layout-rush-checkbox"><input type="checkbox" id="rush-checkbox"><label for="rush-checkbox">Rush Order</label></div>
-                        <select class="select-input" id="rush-type">
-                            <option value="7">7 days</option>
-                            <option value="3">3 days</option>
-                            <option value="1">1 day</option>
-                        </select>
-                    </div>
-                    <div class="discount-checkbox-row">
-                        <div class="discount-checkbox"><input type="checkbox" id="discount-checkbox"><label for="discount-checkbox">Discount (Remove free sets, pay less but receive same quantity)</label></div>
-                    </div>
-                </div>
-                
-                <!-- Location Section -->
-                <div class="option-group">
-                    <label class="option-label">Location</label>
-                    <select class="select-input" id="location-select">
-                        <option value="">Select location</option>
-                        <option value="ncr">NCR</option>
-                        <option value="north-luzon">North Luzon</option>
-                        <option value="central-luzon">Central Luzon</option>
-                        <option value="south-luzon">South Luzon</option>
-                        <option value="visayas">Visayas</option>
-                        <option value="mindanao">Mindanao</option>
-                    </select>
-                </div>
-                
-                <div class="option-group">
-                    <label class="option-label">Courier</label>
-                    <select class="select-input" id="courier-select">
-                        <option value="spx" selected>SPX Express (₱100)</option>
-                        <option value="jnt">J&T Express (₱150)</option>
-                        <option value="lbc">LBC (₱200)</option>
-                    </select>
+                    <div id="selected-addons-list" style="margin-top:8px;"></div>
                 </div>
                 
                 <div class="input-row">
                     <div class="input-group"><label class="input-label">Number of Sets</label><input type="number" class="text-input" id="sets-input" min="1" max="1000" value="20" oninput="this.value = Math.max(1, parseInt(this.value) || 1)"></div>
+                    <div class="discount-checkbox" style="align-self:end;margin-bottom:15px;"><input type="checkbox" id="discount-checkbox"><label for="discount-checkbox">Discount</label></div>
                     <div class="input-group"><label class="input-label">Event Date</label><input type="date" class="date-input" id="event-date-input" value=""></div>
+                </div>
+                
+                <!-- Layout & Rush Section -->
+                <div class="layout-rush-section">
+                    <div style="display:flex;gap:12px;">
+                        <div style="flex:1;">
+                            <label class="option-label">Layout Selection</label>
+                            <div class="layout-rush-row">
+                                <div class="layout-rush-checkbox"><input type="checkbox" id="layout-checkbox"><label for="layout-checkbox">Layout Required</label></div>
+                                <select class="select-input" id="layout-type">
+                                    <option value="no-layout">No layout</option>
+                                    <option value="own-layout">Own layout</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <label class="option-label">Rush Order</label>
+                            <div class="layout-rush-row">
+                                <div class="layout-rush-checkbox"><input type="checkbox" id="rush-checkbox"><label for="rush-checkbox">Rush Order</label></div>
+                                <select class="select-input" id="rush-type">
+                                    <option value="7">7 days</option>
+                                    <option value="3">3 days</option>
+                                    <option value="1">1 day</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location & Courier -->
+                <div style="display:flex;gap:12px;">
+                    <div style="flex:1;">
+                        <label class="option-label">Location</label>
+                        <select class="select-input" id="location-select">
+                            <option value="">Select location</option>
+                            <option value="ncr">NCR</option>
+                            <option value="north-luzon">North Luzon</option>
+                            <option value="central-luzon">Central Luzon</option>
+                            <option value="south-luzon">South Luzon</option>
+                            <option value="visayas">Visayas</option>
+                            <option value="mindanao">Mindanao</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="option-label">Courier</label>
+                        <select class="select-input" id="courier-select">
+                            <option value="spx" selected>SPX Express (₱100)</option>
+                            <option value="jnt">J&T Express (₱150)</option>
+                            <option value="lbc">LBC (₱200)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="button-row">
                     <button class="action-button reset-button" id="reset-button"><i class="fas fa-redo-alt"></i> Reset All</button>
                     <button class="action-button" id="print-button"><i class="fas fa-print"></i> Print</button>
+                </div>
+            <div class="section-divider"></div>
+                <div class="option-group">
+                    <label class="option-label">Import Quotation</label>
+                    <textarea class="text-input" id="import-textarea" rows="3" placeholder="Paste quotation text here..."></textarea>
+                    <button class="action-button" id="import-button" style="margin-top: 8px; width: 100%;">
+                        <i class="fas fa-file-import"></i> Import Quotation
+                    </button>
                 </div>
             </div><!-- /tab-invitation -->
             <div class="tab-panel" id="tab-passport">
@@ -441,6 +448,7 @@
                     <h2 class="section-title">Quotation Summary</h2>
                     <div class="event-type-title" id="event-type-title">Wedding invitation</div>
                     <div class="event-date-line" id="event-date-display"></div>
+                    <div class="payment-method-line" id="payment-method-display"></div>
                     <div class="price-per-set" id="price-per-set">₱25 each</div>
                     <div class="summary-details">
                         <div class="summary-line" id="summary-size-line">4R size</div>
@@ -920,17 +928,46 @@
         }
         
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-            
-            // Try to load saved data from localStorage
+                        // Try to load saved data from localStorage
             loadSavedData();
             
-            setupOptionCards('event-type-options', 'eventType', true);
-            setupOptionCards('size-options', 'size');
-            setupOptionCards('envelope-options', 'envelope');
-            setupOptionCards('paper-options', 'paper');
-            setupOptionCards('seal-options', 'seal');
-            
+            // Event type select
+            document.getElementById('event-type-select').addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                currentSelections.eventType = { value: this.value, price: parseInt(opt.getAttribute('data-price')), name: opt.text };
+                updateEventTypeTitle();
+                updateSummary();
+                saveToLocalStorage();
+            });
+            // Size select
+            document.getElementById('size-select').addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                currentSelections.size = { value: this.value, price: parseInt(opt.getAttribute('data-price')), name: opt.text };
+                updateSummary();
+                saveToLocalStorage();
+            });
+            // Envelope select
+            document.getElementById('envelope-select').addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                currentSelections.envelope = { value: this.value, price: parseInt(opt.getAttribute('data-price')), name: opt.text, custom: false, color: "", texture: "" };
+                updateEnvelopeCheckbox();
+                updateSummary();
+                saveToLocalStorage();
+            });
+            // Paper select
+            document.getElementById('paper-select').addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                currentSelections.paper = { value: this.value, price: parseInt(opt.getAttribute('data-price')), name: opt.text };
+                updateSummary();
+                saveToLocalStorage();
+            });
+            // Seal select
+            document.getElementById('seal-select').addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                currentSelections.seal = { value: this.value, price: parseInt(opt.getAttribute('data-price')), name: opt.text };
+                updateSummary();
+                saveToLocalStorage();
+            });
             // Initialize add-ons
             initializeAddons();
             
@@ -1083,89 +1120,82 @@
         }
         
         function initializeAddons() {
-            const addonsGrid = document.getElementById('addons-grid');
-            
+            const picker = document.getElementById('addon-picker');
             addonsData.forEach(addon => {
-                const addonItem = document.createElement('div');
-                addonItem.className = 'addon-item';
-                const hasDropdown = addon.dropdown && addon.dropdown.length > 0;
-                const isPriceDropdown = hasDropdown && typeof addon.dropdown[0] === 'object';
-                const dropdownOptions = hasDropdown 
-                    ? (isPriceDropdown 
-                        ? addon.dropdown.map(o => `<option value="${o.label}" data-price="${o.price}">${o.label}</option>`).join('')
-                        : addon.dropdown.map(v => `<option value="${v}">${v}</option>`).join(''))
-                    : '';
-                addonItem.innerHTML = `
-                    <div class="addon-header">
-                        <input type="checkbox" class="addon-checkbox" id="addon-${addon.id}" data-id="${addon.id}" data-price="${addon.price}" data-unit="${addon.unit}">
-                        <label class="addon-name" for="addon-${addon.id}">${addon.name}</label>
-                    </div>
-                    ${hasDropdown ? `<div class="addon-option"><select class="select-input addon-dropdown" id="variant-${addon.id}" style="width:100%; height:32px; font-size:0.85rem; padding:4px 8px; line-height:1.4; display:none;" disabled>${dropdownOptions}</select></div>` : ''}
-                    ${addon.unit !== 'flat' ? 
-                        `<div class="addon-option">
-                            <label>${addon.unit === 'page' ? 'Pages' : 'Pieces'}:</label>
-                            <input type="number" class="addon-input" id="qty-${addon.id}" min="1" max="100" value="1" disabled oninput="this.value = Math.max(1, parseInt(this.value) || 1)">
-                        </div>`
-                        : ''}
-                `;
-                addonsGrid.appendChild(addonItem);
-                
-                // Add event listeners for checkbox
-                const checkbox = addonItem.querySelector('.addon-checkbox');
-                const quantityInput = addonItem.querySelector('.addon-input');
-                const dropdown = addonItem.querySelector('.addon-dropdown');
-                
-                checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        if (quantityInput) quantityInput.disabled = false;
-                        if (dropdown) { dropdown.style.display = 'block'; dropdown.disabled = false; }
-                        const selectedPrice = isPriceDropdown 
-                            ? parseInt(dropdown.options[dropdown.selectedIndex].getAttribute('data-price'))
-                            : addon.price;
-                        currentSelections.addons[addon.id] = {
-                            name: addon.name,
-                            price: selectedPrice,
-                            unit: addon.unit,
-                            quantity: quantityInput ? parseInt(quantityInput.value) || 1 : 1,
-                            variant: dropdown ? dropdown.value : null,
-                            isPriceDropdown: isPriceDropdown
-                        };
-                    } else {
-                        if (quantityInput) {
-                            quantityInput.disabled = true;
-                            quantityInput.value = 1;
-                        }
-                        if (dropdown) { dropdown.style.display = 'none'; dropdown.disabled = true; }
-                        delete currentSelections.addons[addon.id];
-                    }
-                    updateSummary();
-                    saveToLocalStorage();
+                const opt = document.createElement('option');
+                opt.value = addon.id;
+                opt.textContent = addon.name;
+                picker.appendChild(opt);
+            });
+            
+            document.getElementById('add-addon-button').addEventListener('click', addSelectedAddon);
+            picker.addEventListener('change', addSelectedAddon);
+            
+            function addSelectedAddon() {
+                const addonId = picker.value;
+                if (!addonId) return;
+                if (currentSelections.addons[addonId]) return;
+                const addon = addonsData.find(a => a.id === addonId);
+                if (!addon) return;
+                currentSelections.addons[addonId] = {
+                    name: addon.name,
+                    price: addon.price,
+                    unit: addon.unit,
+                    quantity: 1,
+                    variant: null,
+                    isPriceDropdown: addon.dropdown && typeof addon.dropdown[0] === 'object',
+                    hasDropdown: addon.dropdown && addon.dropdown.length > 0,
+                    dropdown: addon.dropdown
+                };
+                picker.value = '';
+                renderSelectedAddons();
+                updateSummary();
+                saveToLocalStorage();
+            }
+            renderSelectedAddons();
+        }
+        
+        function renderSelectedAddons() {
+            const list = document.getElementById('selected-addons-list');
+            list.innerHTML = '';
+            Object.keys(currentSelections.addons).forEach(addonId => {
+                const addon = currentSelections.addons[addonId];
+                const orig = addonsData.find(a => a.id === addonId);
+                if (!orig) return;
+                const hasDropdown = addon.hasDropdown || (orig.dropdown && orig.dropdown.length > 0);
+                const isPriceDropdown = addon.isPriceDropdown || (orig.dropdown && typeof orig.dropdown[0] === 'object');
+                const item = document.createElement('div');
+                item.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;border:1px solid #e0e0e0;border-radius:4px;margin-bottom:6px;background:#f9f9f9;';
+                let h = `<strong style="min-width:100px;">${addon.name}</strong>`;
+                if (hasDropdown) {
+                    const dd = addon.dropdown || orig.dropdown;
+                    const opts = typeof dd[0] === 'object'
+                        ? dd.map(o => `<option value="${o.label}" data-price="${o.price}">${o.label}</option>`).join('')
+                        : dd.map(v => `<option value="${v}">${v}</option>`).join('');
+                    h += `<select class="select-input" id="variant-${addonId}" style="flex:1;min-width:140px;height:34px;font-size:0.85rem;">${opts}</select>`;
+                }
+                if (orig.unit === 'page') h += `<label>Pages:</label><input type="number" id="qty-${addonId}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
+                else if (orig.unit === 'piece') h += `<label>Pcs:</label><input type="number" id="qty-${addonId}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
+                h += `<button style="padding:4px 10px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.8rem;">✕</button>`;
+                item.innerHTML = h;
+                list.appendChild(item);
+                const vs = item.querySelector('select');
+                if (vs && addon.variant) vs.value = addon.variant;
+                if (vs) vs.addEventListener('change', function() {
+                    addon.variant = this.value;
+                    if (isPriceDropdown) addon.price = parseInt(this.options[this.selectedIndex].getAttribute('data-price'));
+                    updateSummary(); saveToLocalStorage();
                 });
-                
-                // Add event listener for quantity input
-                if (quantityInput) {
-                    quantityInput.addEventListener('input', function() {
-                        if (checkbox.checked) {
-                            currentSelections.addons[addon.id].quantity = parseInt(this.value) || 1;
-                            updateSummary();
-                            saveToLocalStorage();
-                        }
-                    });
-                }
-                
-                // Add event listener for dropdown change
-                if (dropdown) {
-                    dropdown.addEventListener('change', function() {
-                        if (checkbox.checked) {
-                            currentSelections.addons[addon.id].variant = this.value;
-                            if (isPriceDropdown) {
-                                currentSelections.addons[addon.id].price = parseInt(this.options[this.selectedIndex].getAttribute('data-price'));
-                            }
-                            updateSummary();
-                            saveToLocalStorage();
-                        }
-                    });
-                }
+                const qi = item.querySelector('input[type="number"]');
+                if (qi) qi.addEventListener('input', function() {
+                    addon.quantity = Math.max(1, parseInt(this.value) || 1);
+                    updateSummary(); saveToLocalStorage();
+                });
+                item.querySelector('button').addEventListener('click', function() {
+                    delete currentSelections.addons[addonId];
+                    renderSelectedAddons();
+                    updateSummary(); saveToLocalStorage();
+                });
             });
         }
         
@@ -1336,7 +1366,7 @@
                 const rates = {7: 10, 3: 15, 1: 20};
                 const perSet = rates[days] || 10;
                 rushFee = 100 + (perSet * numberOfSets);
-                rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
+                rushSummary = `${days} days production: ₱${rushFee}`;
             }
             
             // Calculate price per set (including flat add-ons except Map layout)
@@ -1369,7 +1399,7 @@
             let freeSets = 0;
             
             // Apply discount logic - for both direct-shipping and show all
-			if (currentSelections.discount) {
+			if (currentSelections.discount && (currentSelections.paymentMethod === "direct-shipping" || currentSelections.paymentMethod === "none")) {
 				// Calculate free sets but don't give them for free, instead reduce payable sets
 				freeSets = calculateFreeSetsForDirectShipping(numberOfSets);
 				payableSets = numberOfSets - freeSets;
@@ -1487,7 +1517,7 @@
             document.getElementById('mobile-bar-sets').textContent = `${numberOfSets} sets`;
             
             // Toggle invitation breakdown visibility for passport-only mode
-            const inviEls = document.querySelectorAll('#event-type-title, #event-date-display, #price-per-set, #summary-size-line, #summary-envelope-line, #summary-inserts-line, #summary-paper-line, #summary-seal-line, #addons-summary, #one-time-fees, #sets-total');
+            const inviEls = document.querySelectorAll('#event-type-title, #event-date-display, #payment-method-display, #price-per-set, #summary-size-line, #summary-envelope-line, #summary-inserts-line, #summary-paper-line, #summary-seal-line, #addons-summary, #one-time-fees, #sets-total');
             inviEls.forEach(el => el.style.display = passportOnlyMode ? 'none' : '');
             document.getElementById('addons-summary').style.display = passportOnlyMode ? 'none' : '';
         }
@@ -1500,24 +1530,72 @@
             const courierLabel = courierNames[courier] || 'SPX';
             const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} (${courierLabel})` : 'FREE Shipping';
             
+            // Calculate free sets for display (for non-discount case)
             const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
             
             let paymentMethodsHTML = '';
+            
+            // Calculate downpayment (50% of final total including shipping)
             const downpayment = roundToWholeNumber(finalTotal / 2);
             const balance = finalTotal - downpayment;
+            const shopeeCOD = roundToWholeNumber(balance * 1.15); // 15% additional for COD
             
-            // Direct shipping only
-            paymentMethodsHTML += `
-                <div class="payment-method-option">
-                    <div class="payment-method-title">Direct shipping</div>
-                    <div class="payment-method-details">
-                        Downpayment: ₱${downpayment}<br>
-                        Balance before ship out: ₱${balance}<br>
-                        ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                        ${shippingLabel}
+            // Show payment methods based on selection
+            if (currentSelections.paymentMethod === "none") {
+                // Show both Direct Shipping and Shopee Checkout
+                paymentMethodsHTML += `
+                    <div class="payment-method-option">
+                        <div class="payment-method-title">Direct shipping</div>
+                        <div class="payment-method-details">
+                            Downpayment: ₱${downpayment}<br>
+                            Balance before ship out: ₱${balance}<br>
+                            ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
+                            ${shippingLabel}
+                        </div>
                     </div>
-                </div>
-            `;
+                    <div class="payment-method-option">
+                        <div class="payment-method-title">Shopee Checkout (15% add)</div>
+                        <div class="payment-method-details">
+                            Downpayment: ₱${downpayment}<br>
+                            COD: ₱${shopeeCOD} ${shippingFee > 0 ? `+ shipping fee` : ''}
+                        </div>
+                    </div>
+                `;
+            } else if (currentSelections.paymentMethod === "direct-shipping") {
+                // Show only Direct Shipping
+                paymentMethodsHTML += `
+                    <div class="payment-method-option">
+                        <div class="payment-method-title">Direct shipping</div>
+                        <div class="payment-method-details">
+                            Downpayment: ₱${downpayment}<br>
+                            Balance before ship out: ₱${balance}<br>
+                            ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
+                            ${shippingLabel}
+                        </div>
+                    </div>
+                `;
+            } else if (currentSelections.paymentMethod === "shopee-checkout") {
+                // Show only Shopee Checkout (COD)
+                paymentMethodsHTML += `
+                    <div class="payment-method-option">
+                        <div class="payment-method-title">Shopee Checkout (15% add)</div>
+                        <div class="payment-method-details">
+                            Downpayment: ₱${downpayment}<br>
+                            COD: ₱${shopeeCOD} ${shippingFee > 0 ? `+ shipping fee` : ''}
+                        </div>
+                    </div>
+                `;
+            } else if (currentSelections.paymentMethod === "shopee-checkout-full") {
+                // Show only Shopee Checkout Full Payment
+                paymentMethodsHTML += `
+                    <div class="payment-method-option">
+                        <div class="payment-method-title">Shopee Checkout Full Payment</div>
+                        <div class="payment-method-details">
+                            Full Payment: ₱${finalTotal} ${shippingFee > 0 ? `+ shipping fee` : ''}
+                        </div>
+                    </div>
+                `;
+            }
             
             // Add discount note if applicable
             if (currentSelections.discount && freeSets > 0) {
@@ -1587,36 +1665,15 @@
         }
         
         function updateUIFromSavedData() {
-            // Update event type
-            const eventTypeCards = document.querySelectorAll('#event-type-options .option-card');
-            eventTypeCards.forEach(card => {
-                if (card.getAttribute('data-value') === currentSelections.eventType.value) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
+            // Update event type select
+            document.getElementById('event-type-select').value = currentSelections.eventType.value;
             updateEventTypeTitle();
             
-            // Update size
-            const sizeCards = document.querySelectorAll('#size-options .option-card');
-            sizeCards.forEach(card => {
-                if (card.getAttribute('data-value') === currentSelections.size.value) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
+            // Update size select
+            document.getElementById('size-select').value = currentSelections.size.value;
             
-            // Update envelope
-            const envelopeCards = document.querySelectorAll('#envelope-options .option-card');
-            envelopeCards.forEach(card => {
-                if (card.getAttribute('data-value') === currentSelections.envelope.value) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
+            // Update envelope select
+            document.getElementById('envelope-select').value = currentSelections.envelope.value;
 			
 			// Update envelope customization UI
 			if (currentSelections.envelope) {
@@ -1628,25 +1685,11 @@
             // Update inserts slider
             document.getElementById('inserts-input').value = currentSelections.inserts.value;
             
-            // Update paper
-            const paperCards = document.querySelectorAll('#paper-options .option-card');
-            paperCards.forEach(card => {
-                if (card.getAttribute('data-value') === currentSelections.paper.value) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
+            // Update paper select
+            document.getElementById('paper-select').value = currentSelections.paper.value;
             
-            // Update seal
-            const sealCards = document.querySelectorAll('#seal-options .option-card');
-            sealCards.forEach(card => {
-                if (card.getAttribute('data-value') === currentSelections.seal.value) {
-                    card.classList.add('selected');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
+            // Update seal select
+            document.getElementById('seal-select').value = currentSelections.seal.value;
             
             // Update layout checkbox and dropdown
             document.getElementById('layout-checkbox').checked = currentSelections.layout.required;
@@ -1710,48 +1753,28 @@
         
         function resetSelections() {
             if (!confirm("Reset all selections to default values?")) return;
-            const eventTypeCards = document.querySelectorAll('#event-type-options .option-card');
-            eventTypeCards.forEach(card => card.classList.remove('selected'));
-            eventTypeCards[0].classList.add('selected');
+            document.getElementById('event-type-select').value = "wedding";
             currentSelections.eventType = { value: "wedding", price: 0, name: "Wedding" };
             updateEventTypeTitle();
             
-            const sizeCards = document.querySelectorAll('#size-options .option-card');
-            sizeCards.forEach(card => card.classList.remove('selected'));
-            sizeCards[0].classList.add('selected');
+            document.getElementById('size-select').value = "4r";
             currentSelections.size = { value: "4r", price: 0, name: "4R" };
             
-            const envelopeCards = document.querySelectorAll('#envelope-options .option-card');
-            envelopeCards.forEach(card => card.classList.remove('selected'));
-            envelopeCards[1].classList.add('selected');
+            document.getElementById('envelope-select').value = "plain-white";
             currentSelections.envelope = { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" };
             
             document.getElementById('inserts-input').value = 2;
             currentSelections.inserts = { value: 2, price: 10 };
             
-            const paperCards = document.querySelectorAll('#paper-options .option-card');
-            paperCards.forEach(card => card.classList.remove('selected'));
-            paperCards[0].classList.add('selected');
+            document.getElementById('paper-select').value = "matte";
             currentSelections.paper = { value: "matte", price: 0, name: "Matte" };
             
-            const sealCards = document.querySelectorAll('#seal-options .option-card');
-            sealCards.forEach(card => card.classList.remove('selected'));
-            sealCards[0].classList.add('selected');
+            document.getElementById('seal-select').value = "no-seal";
             currentSelections.seal = { value: "no-seal", price: 0, name: "No seal" };
             
             // Reset add-ons
-            document.querySelectorAll('.addon-checkbox').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            document.querySelectorAll('.addon-input').forEach(input => {
-                input.value = 1;
-                input.disabled = true;
-            });
-            document.querySelectorAll('.addon-dropdown').forEach(dd => {
-                dd.style.display = 'none';
-                dd.disabled = true;
-            });
             currentSelections.addons = {};
+            renderSelectedAddons();
             
             document.getElementById('envelope-checkbox').checked = false;
 			document.getElementById('color-select').value = "";
@@ -1932,7 +1955,7 @@ function copyQuotation() {
         const rates = {7: 10, 3: 15, 1: 20};
         const perSet = rates[days] || 10;
         rushFee = 100 + (perSet * numberOfSets);
-        rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
+        rushSummary = `${days} days production: ₱${rushFee}`;
     }
     
     // Calculate price per set (including flat add-ons except Map layout)
@@ -2032,6 +2055,7 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
     const downpayment = roundToWholeNumber(finalTotal / 2);
     const balance = finalTotal - downpayment;
+    const shopeeCOD = roundToWholeNumber(balance * 1.15); // 15% additional for COD
     
     const eventType = currentSelections.eventType.name;
     const eventTitle = eventType === "Special event" ? "Special event invitation" : `${eventType} invitation`;
@@ -2108,17 +2132,57 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     quotationText += `\n\nTotal: ₱${finalTotal}`;
     
-    // Direct shipping payment
-    quotationText += `\n\nPayment method\n\nDirect shipping\n\n`;
-    quotationText += `Downpayment: ₱${downpayment}\n`;
-    quotationText += `Balance before ship out: ₱${balance}`;
-    if (displayFreeSets > 0) {
-        quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
-    }
-    if (shippingFee > 0) {
-        quotationText += `\n+ ₱${shippingFee} Shipping fee`;
-    } else {
-        quotationText += `\nFREE Shipping`;
+    // Add payment methods based on selection
+    quotationText += `\n\nPayment method`;
+    
+    if (currentSelections.paymentMethod === "none") {
+        // Show both Direct Shipping and Shopee Checkout
+        quotationText += `\n\nDirect shipping\n\n`;
+        quotationText += `Downpayment: ₱${downpayment}\n`;
+        quotationText += `Balance before ship out: ₱${balance}`;
+        if (displayFreeSets > 0) {
+            quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
+        }
+        if (shippingFee > 0) {
+            quotationText += `\n+ ₱${shippingFee} Shipping fee`;
+        } else {
+            quotationText += `\nFREE Shipping`;
+        }
+        
+        quotationText += `\n\nShopee Checkout (15% add)\n\n`;
+        quotationText += `Downpayment: ₱${downpayment}\n`;
+        quotationText += `COD: ₱${shopeeCOD}`;
+        if (shippingFee > 0) {
+            quotationText += ` + shipping fee`;
+        }
+    } else if (currentSelections.paymentMethod === "direct-shipping") {
+        // Show only Direct Shipping
+        quotationText += `\n\nDirect shipping\n\n`;
+        quotationText += `Downpayment: ₱${downpayment}\n`;
+        quotationText += `Balance before ship out: ₱${balance}`;
+        if (displayFreeSets > 0) {
+            quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
+        }
+        if (shippingFee > 0) {
+            quotationText += `\n+ ₱${shippingFee} Shipping fee`;
+        } else {
+            quotationText += `\nFREE Shipping`;
+        }
+    } else if (currentSelections.paymentMethod === "shopee-checkout") {
+        // Show only Shopee Checkout (COD)
+        quotationText += `\n\nShopee Checkout (15% add)\n\n`;
+        quotationText += `Downpayment: ₱${downpayment}\n`;
+        quotationText += `COD: ₱${shopeeCOD}`;
+        if (shippingFee > 0) {
+            quotationText += ` + shipping fee`;
+        }
+    } else if (currentSelections.paymentMethod === "shopee-checkout-full") {
+        // Show only Shopee Checkout Full Payment
+        quotationText += `\n\nShopee Checkout Full Payment\n\n`;
+        quotationText += `Full Payment: ₱${finalTotal}`;
+        if (shippingFee > 0) {
+            quotationText += ` + shipping fee`;
+        }
     }
     
     // Add discount note if applicable
@@ -2145,48 +2209,28 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
 }
         
         function resetSelectionsOnly() {
-    const eventTypeCards = document.querySelectorAll('#event-type-options .option-card');
-    eventTypeCards.forEach(card => card.classList.remove('selected'));
-    eventTypeCards[0].classList.add('selected');
+    document.getElementById('event-type-select').value = "wedding";
     currentSelections.eventType = { value: "wedding", price: 0, name: "Wedding" };
     updateEventTypeTitle();
     
-    const sizeCards = document.querySelectorAll('#size-options .option-card');
-    sizeCards.forEach(card => card.classList.remove('selected'));
-    sizeCards[0].classList.add('selected');
+    document.getElementById('size-select').value = "4r";
     currentSelections.size = { value: "4r", price: 0, name: "4R" };
     
-    const envelopeCards = document.querySelectorAll('#envelope-options .option-card');
-    envelopeCards.forEach(card => card.classList.remove('selected'));
-    envelopeCards[1].classList.add('selected');
+    document.getElementById('envelope-select').value = "plain-white";
     currentSelections.envelope = { value: "plain-white", price: 0, name: "Plain white", custom: false, color: "", texture: "" };
     
     document.getElementById('inserts-input').value = 2;
     currentSelections.inserts = { value: 2, price: 10 };
     
-    const paperCards = document.querySelectorAll('#paper-options .option-card');
-    paperCards.forEach(card => card.classList.remove('selected'));
-    paperCards[0].classList.add('selected');
+    document.getElementById('paper-select').value = "matte";
     currentSelections.paper = { value: "matte", price: 0, name: "Matte" };
-    
-    const sealCards = document.querySelectorAll('#seal-options .option-card');
-    sealCards.forEach(card => card.classList.remove('selected'));
-    sealCards[0].classList.add('selected');
+            
+    document.getElementById('seal-select').value = "no-seal";
     currentSelections.seal = { value: "no-seal", price: 0, name: "No seal" };
     
     // Reset add-ons
-    document.querySelectorAll('.addon-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    document.querySelectorAll('.addon-input').forEach(input => {
-        input.value = 1;
-        input.disabled = true;
-    });
-    document.querySelectorAll('.addon-dropdown').forEach(dd => {
-        dd.style.display = 'none';
-        dd.disabled = true;
-    });
     currentSelections.addons = {};
+    renderSelectedAddons();
     
     document.getElementById('envelope-checkbox').checked = false;
     document.getElementById('color-select').value = "";
@@ -2199,12 +2243,6 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     currentSelections.layout = { required: false, type: "no-layout", pages: 1 };
     currentSelections.rush = { required: false, type: "7" };
     currentSelections.discount = false;
-    
-    // Reset payment method
-    const paymentMethodCards = document.querySelectorAll('#payment-method-options .option-card');
-    paymentMethodCards.forEach(card => card.classList.remove('selected'));
-    paymentMethodCards[0].classList.add('selected');
-    currentSelections.paymentMethod = "direct-shipping";
     
     // Reset location
     document.getElementById('location-select').value = "";
@@ -2613,13 +2651,6 @@ for (const line of lines) {
         });
         
         // Clear existing add-ons
-        document.querySelectorAll('.addon-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        document.querySelectorAll('.addon-input').forEach(input => {
-            input.value = 1;
-            input.disabled = true;
-        });
         currentSelections.addons = {};
         
         // Process add-on lines
@@ -2628,33 +2659,17 @@ for (const line of lines) {
             
             addonsData.forEach(addon => {
                 if (lowerLine.includes(addon.name.toLowerCase())) {
-                    // Check for quantity in the line
                     let quantity = 1;
                     const quantityMatch = line.match(/(\d+)\s*(?:page|pages|pc|pcs)/i);
-                    if (quantityMatch) {
-                        quantity = parseInt(quantityMatch[1]);
-                    }
+                    if (quantityMatch) quantity = parseInt(quantityMatch[1]);
                     
-                    // Find and check the checkbox
-                    const checkbox = document.getElementById(`addon-${addon.id}`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                        
-                        // Enable and set quantity input if exists
-                        const quantityInput = document.getElementById(`qty-${addon.id}`);
-                        if (quantityInput) {
-                            quantityInput.disabled = false;
-                            quantityInput.value = quantity;
-                        }
-                        
-                        // Update current selections
-                        currentSelections.addons[addon.id] = {
-                            name: addon.name,
-                            price: addon.price,
-                            unit: addon.unit,
-                            quantity: quantity
-                        };
-                    }
+                    currentSelections.addons[addon.id] = {
+                        name: addon.name, price: addon.price, unit: addon.unit,
+                        quantity: quantity, variant: null,
+                        isPriceDropdown: addon.dropdown && typeof addon.dropdown[0] === 'object',
+                        hasDropdown: addon.dropdown && addon.dropdown.length > 0,
+                        dropdown: addon.dropdown
+                    };
                 }
             });
         });
