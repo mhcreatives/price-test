@@ -12,6 +12,21 @@
         header { text-align: center; padding: 10px 20px; background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; }
         h1 { font-size: 1.5rem; color: #333333; font-weight: 400; }
         .calculator-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .calculator-wrapper { grid-template-columns: 1fr; gap: 15px; }
+            .container { padding: 10px; }
+            .options-panel, .result-panel { position: static; max-height: none; padding: 12px; }
+            .options-panel { overflow-y: visible; }
+            h1 { font-size: 1.2rem; }
+            .input-row { grid-template-columns: 1fr; gap: 8px; }
+            header { padding: 8px; margin-bottom: 10px; }
+            .tab-btn { padding: 6px 12px; font-size: 0.85rem; }
+            .action-button { padding: 6px; font-size: 0.8rem; height: 36px; }
+            select, .select-input { font-size: 16px !important; } /* prevent iOS zoom */
+        }
+        
         @media (max-width: 900px) { .calculator-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
