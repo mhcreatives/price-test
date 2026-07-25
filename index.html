@@ -505,7 +505,9 @@
             { id: 'custom-cut', name: 'Custom cut', price: 10, unit: 'page' },
 			            { id: 'arc-cut', name: 'Arc cut', price: 5, unit: 'page' },
             { id: 'photo-print', name: 'Photo print', price: 5, unit: 'page' },
-            { id: 'solid-color-print', name: 'Solid color print', price: 5, unit: 'page', dropdown: ['Light', 'Dark', 'Black'] },
+            { id: 'solid-color-print', name: 'Solid color print', price: 5, unit: 'page', dropdown: [
+                {label:'Light', price:5, rule:'light'}, {label:'Dark', price:5, rule:'dark'}, {label:'Black', price:5, rule:'black'}
+            ] },
             { id: 'vellum-jacket', name: 'Vellum jacket', price: 25, unit: 'flat' },
             { id: 'vellum-jacket-print', name: 'Vellum jacket with print', price: 35, unit: 'flat' },
             { id: 'frosted-insert', name: 'Frosted insert', price: 15, unit: 'page' },
@@ -525,8 +527,7 @@
             { id: 'liner', name: 'Liner', price: 20, unit: 'flat' },
 			{ id: 'decals', name: 'Decals', unit: 'piece', dropdown: [{label:'₱10',price:10},{label:'₱15',price:15},{label:'₱20',price:20},{label:'₱25',price:25},{label:'₱30',price:30}] },
 			{ id: 'foil', name: 'Foil', price: 15, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
-			{ id: 'foil-full-page', name: 'Foil full page', price: 20, unit: 'page', dropdown: ['Gold', 'Silver', 'Rosegold'] },
-			{ id: 'envelope-print', name: 'Envelope print', price: 10, unit: 'page' },
+            { id: 'envelope-print', name: 'Envelope print', price: 15, unit: 'piece' },
 			{ id: 'website', name: 'Website', unit: 'flat', dropdown: [
 			    {label:'No RSVP (Sample 1)', price:599}, {label:'With RSVP (Sample 1)', price:699},
 			    {label:'No RSVP (Sample 2)', price:899}, {label:'With RSVP (Sample 2)', price:999}
@@ -1141,7 +1142,7 @@
                     name: addon.name,
                     price: addon.price,
                     unit: addon.unit,
-                    quantity: 1,
+                    quantity: addon.id === 'solid-color-print' ? currentSelections.inserts.value : 1,
                     variant: null,
                     isPriceDropdown: addon.dropdown && typeof addon.dropdown[0] === 'object',
                     hasDropdown: addon.dropdown && addon.dropdown.length > 0,
@@ -1176,10 +1177,12 @@
                 }
                 if (orig.unit === 'page') h += `<label>Pages:</label><input type="number" id="qty-${addonId}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
                 else if (orig.unit === 'piece') h += `<label>Pcs:</label><input type="number" id="qty-${addonId}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
+                if (addonId === 'foil' || addonId === 'envelope-print') h += `<label><input type="checkbox" id="fullpage-${addonId}" ${addon.fullPage?'checked':''} style="vertical-align:middle;"> Full page</label>`;
                 h += `<button style="padding:4px 10px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.8rem;">✕</button>`;
                 item.innerHTML = h;
                 list.appendChild(item);
                 const vs = item.querySelector('select');
+                if (vs && !addon.variant) { addon.variant = vs.value; if (isPriceDropdown) addon.price = parseInt(vs.options[vs.selectedIndex].getAttribute('data-price')); updateSummary(); }
                 if (vs && addon.variant) vs.value = addon.variant;
                 if (vs) vs.addEventListener('change', function() {
                     addon.variant = this.value;
@@ -1194,6 +1197,12 @@
                 item.querySelector('button').addEventListener('click', function() {
                     delete currentSelections.addons[addonId];
                     renderSelectedAddons();
+                    updateSummary(); saveToLocalStorage();
+                });
+                const fp = item.querySelector('input[type="checkbox"]');
+                if (fp) fp.addEventListener('change', function() {
+                    addon.fullPage = this.checked;
+                    addon.price = this.checked ? 20 : 15;
                     updateSummary(); saveToLocalStorage();
                 });
             });
@@ -1214,16 +1223,17 @@
                 document.getElementById('event-date-display').textContent = ``;
             }
         }
-        
         function calculateAddonsTotal() {
+            const numberOfSets = parseInt(document.getElementById('sets-input').value) || 0;
             let total = 0;
             let summaryHTML = '';
             
-            // Helper to get display name with variant
-            const getAddonDisplayName = (addon) => addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
-            
             Object.keys(currentSelections.addons).forEach(addonId => {
                 const addon = currentSelections.addons[addonId];
+                const getAddonDisplayName = (a) => {
+                    const base = a.variant ? `${a.variant} ${a.name}` : a.name;
+                    return a.fullPage && addonId !== 'foil' ? `Full page ${base.toLowerCase()}` : base;
+                };
                 let addonTotal = 0;
                 
                 if (addon.unit === 'flat') {
@@ -1232,13 +1242,26 @@
                         addonTotal = addon.price * currentSelections.inserts.value;
                     } else {
                         addonTotal = addon.price;
-                        summaryHTML += `<div class="summary-line">${getAddonDisplayName(addon)}</div>`;
+                        if (flatAddonsInPricePerSet.includes(addonId)) {
+                            summaryHTML += `<div class="summary-line">${getAddonDisplayName(addon)}</div>`;
+                        }
                     }
                 } else if (addon.unit === 'page' || addon.unit === 'piece') {
-                    addonTotal = addon.price * addon.quantity * numberOfSets;
+                    if (addonId === 'solid-color-print' && addon.variant) {
+                        addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
+                    }
+                    if (addonId === 'envelope-print') {
+                        addonTotal = addon.price * addon.quantity;
+                    } else {
+                        addonTotal = addon.price * addon.quantity * numberOfSets;
+                    }
                     const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
                                     (addon.quantity === 1 ? 'pc' : 'pcs');
-                    summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${getAddonDisplayName(addon)}</div>`;
+                    if (addonId === 'foil' && addon.fullPage) {
+                        summaryHTML += `<div class="summary-line">1 page ${getAddonDisplayName(addon)} full page</div>`;
+                    } else if (addonId !== 'envelope-print') {
+                        summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${getAddonDisplayName(addon)}</div>`;
+                    }
                 }
                 
                 total += addonTotal;
@@ -1246,6 +1269,18 @@
             
             document.getElementById('addons-summary').innerHTML = summaryHTML;
             return total;
+        }
+        
+        // Solid color print pricing
+        function calculateSolidColorPrice(variant, inserts) {
+            if (!variant) return 5;
+            const pages = inserts;
+            const rule = { light: (p) => p <= 2 ? 0 : Math.ceil((p - 2) / 4) * 5,
+                dark: (p) => Math.ceil(p / 2) * 5,
+                black: (p) => p * 5
+            };
+            const variantKey = variant.label || variant;
+            return (rule[variantKey.toLowerCase()] || (() => 5))(pages);
         }
         
         function calculateShippingFee(totalAmount) {
@@ -1385,6 +1420,11 @@
                     return;
                 }
                 
+                // Update dynamic prices from pages input
+                if (addonId === 'solid-color-print' && addon.variant) {
+                    addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
+                }
+                
                 if (addon.unit === 'flat') {
                     // Check if this flat add-on should be included in price per set
                     if (flatAddonsInPricePerSet.includes(addonId)) {
@@ -1394,7 +1434,9 @@
                     // Note: flat add-ons NOT in the list are treated as one-time fees
                 } else {
                     // For per-page/per-piece add-ons, add their price to price per set
-                    addonPricePerSet += addon.price * addon.quantity;
+                    if (addonId !== 'envelope-print') {
+                        addonPricePerSet += addon.price * addon.quantity;
+                    }
                 }
             });
             
@@ -1430,11 +1472,16 @@
                     const eInviteTotal = addon.price * currentSelections.inserts.value;
                     oneTimeFeesTotal += eInviteTotal;
                     oneTimeFeesHTML += `<div class="summary-line">E-invite (${currentSelections.inserts.value} ${currentSelections.inserts.value === 1 ? 'page' : 'pages'}): ₱${eInviteTotal}</div>`;
+                } else if (addonId === 'envelope-print') {
+                    const epTotal = addon.price * (addon.quantity || 1);
+                    oneTimeFeesTotal += epTotal;
+                    const displayName = addon.fullPage ? 'Full page envelope print' : 'Envelope print';
+                    oneTimeFeesHTML += `<div class="summary-line">${addon.quantity || 1} pcs ${displayName}: ₱${epTotal}</div>`;
                 } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
                     // Flat add-ons NOT in the price-per-set list are one-time fees
                     oneTimeFeesTotal += addon.price;
-                    const displayName = addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
-                    oneTimeFeesHTML += `<div class="summary-line">${displayName}: ₱${addon.price}</div>`;
+                    const displayName = addon.fullPage ? `Full page ${addon.name.toLowerCase()}` : (addon.variant ? `${addon.variant} ${addon.name}` : addon.name);
+                    oneTimeFeesHTML += `<div class="summary-line">${displayName}</div>`;
                 }
             });
 			
@@ -1808,6 +1855,11 @@
             return;
         }
         
+        // Update dynamic prices from inserts
+        if (addonId === 'solid-color-print' && addon.variant) {
+            addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
+        }
+        
         if (addon.unit === 'flat') {
             // Check if this flat add-on should be included in price per set
             if (flatAddonsInPricePerSet.includes(addonId)) {
@@ -1930,6 +1982,11 @@ function copyQuotation() {
             return;
         }
         
+        // Update dynamic prices from inserts
+        if (addonId === 'solid-color-print' && addon.variant) {
+            addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
+        }
+        
         if (addon.unit === 'flat') {
             // Check if this flat add-on should be included in price per set
             if (flatAddonsInPricePerSet.includes(addonId)) {
@@ -1981,9 +2038,9 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
             oneTimeFeesText += `E-invite (${currentSelections.inserts.value} ${currentSelections.inserts.value === 1 ? 'page' : 'pages'}): ₱${eInviteTotal}\n`;
         } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
             // Flat add-ons NOT in the price-per-set list are one-time fees
-            const displayName = addon.variant ? `${addon.variant} ${addon.name}` : addon.name;
+            const displayName = addon.fullPage ? `Full page ${addon.name.toLowerCase()}` : (addon.variant ? `${addon.variant} ${addon.name}` : addon.name);
             oneTimeFeesTotal += addon.price;
-            oneTimeFeesText += `${displayName}: ₱${addon.price}\n`;
+            oneTimeFeesText += `${displayName}\n`;
         }
     });
     
