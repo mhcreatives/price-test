@@ -128,20 +128,25 @@
         @media (max-width: 900px) { .mobile-price-bar { display: flex; } body { padding-bottom: 60px; } }
     /* Mobile responsive */
         @media (max-width: 768px) {
-            .calculator-wrapper { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; }
-            .container { padding: 10px; }
-            .result-panel { position: static; max-height: none; height: auto; overflow-y: visible; align-self: auto; display: block; padding: 12px; }
-            .options-panel { position: static; max-height: none; padding: 12px; overflow-y: visible; }
-            h1 { font-size: 1.2rem; }
-            .input-row { grid-template-columns: 1fr; gap: 8px; }
-            header { padding: 8px; margin-bottom: 10px; }
-            .tab-btn { padding: 6px 12px; font-size: 0.85rem; }
-            .action-button { padding: 6px; font-size: 0.8rem; height: 36px; }
-            select, .select-input { font-size: 16px !important; }
-            [style*="display:flex"][style*="gap:12px"] { flex-direction: column; gap: 8px !important; }
+           .calculator-wrapper { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; }
+           .container { padding: 10px; }
+           .result-panel { position: static; max-height: none; height: auto; overflow: visible; align-self: auto; display: block; padding: 8px; font-size: 0.75rem; word-break: break-word; }
+           .result-panel .summary-line { font-size: 0.7rem; }
+           .result-panel .section-title { font-size: 0.85rem; }
+           .result-panel .event-type-title { font-size: 0.9rem; }
+           .result-panel .final-total { font-size: 0.9rem; }
+           .result-panel .copy-button, .result-panel .copy-price-button { font-size: 0.7rem; padding: 6px; height: auto; }
+           .options-panel { position: static; max-height: none; padding: 12px; overflow-y: visible; }
+           h1 { font-size: 1.2rem; }
+           .input-row { grid-template-columns: 1fr; gap: 8px; }
+           header { padding: 8px; margin-bottom: 10px; }
+           .tab-btn { padding: 6px 12px; font-size: 0.85rem; }
+           .action-button { padding: 6px; font-size: 0.8rem; height: 36px; }
+           select, .select-input { font-size: 16px !important; }
+           [style*="display:flex"][style*="gap:12px"] { flex-direction: column; gap: 8px !important; }
         }
         
-
+ 
 </style>
 </head>
 <body>
