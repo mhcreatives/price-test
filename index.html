@@ -358,9 +358,9 @@
                     <div style="flex:1;">
                         <label class="option-label">Courier</label>
                         <select class="select-input" id="courier-select">
-                            <option value="spx" selected>SPX Express (₱100)</option>
-                            <option value="jnt">J&T Express (₱150)</option>
-                            <option value="lbc">LBC (₱200)</option>
+                            <option value="spx" selected>SPX Express</option>
+                            <option value="jnt">J&T Express</option>
+                            <option value="lbc">LBC</option>
                         </select>
                     </div>
                 </div>
@@ -1249,11 +1249,16 @@
         }
         
         function calculateShippingFee(totalAmount) {
-            // Courier base prices and free shipping thresholds
+            // Courier base prices
             const courierPrices = { 'spx': 100, 'jnt': 150, 'lbc': 200 };
-            const freeThresholds = { 'spx': 6000, 'jnt': 6000, 'lbc': 10000 };
             let baseFee = courierPrices[courier] || 100;
-            if (totalAmount >= (freeThresholds[courier] || 6000)) baseFee = 0;
+            
+            // Order total multiplier (not applicable to LBC)
+            let totalMultiplier = 1;
+            if (courier !== 'lbc') {
+                if (totalAmount >= 6000) totalMultiplier = 0;
+                else if (totalAmount >= 3000) totalMultiplier = 0.5;
+            }
             
             // Apply location multiplier
             const locationMultipliers = {
@@ -1265,7 +1270,7 @@
                 'mindanao': 1.5
             };
             const multiplier = locationMultipliers[currentSelections.location] || 1;
-            return Math.round(baseFee * multiplier);
+            return Math.round(baseFee * totalMultiplier * multiplier);
         }
         
         function calculateFreeSetsForDirectShipping(setsCount) {
@@ -1365,8 +1370,9 @@
                 const days = parseInt(currentSelections.rush.type) || 7;
                 const rates = {7: 10, 3: 15, 1: 20};
                 const perSet = rates[days] || 10;
-                rushFee = 100 + (perSet * numberOfSets);
-                rushSummary = `${days} days production: ₱${rushFee}`;
+                const layoutRush = currentSelections.layout.type === 'own-layout' ? 0 : 100;
+                rushFee = layoutRush + (perSet * numberOfSets);
+                rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
             }
             
             // Calculate price per set (including flat add-ons except Map layout)
@@ -1396,21 +1402,20 @@
             
             // Calculate sets total (price for all sets)
             let payableSets = numberOfSets;
-            let freeSets = 0;
-            
-            // Apply discount logic - for both direct-shipping and show all
-			if (currentSelections.discount && (currentSelections.paymentMethod === "direct-shipping" || currentSelections.paymentMethod === "none")) {
-				// Calculate free sets but don't give them for free, instead reduce payable sets
-				freeSets = calculateFreeSetsForDirectShipping(numberOfSets);
-				payableSets = numberOfSets - freeSets;
-			} else {
-				// Normal calculation
-				payableSets = numberOfSets;
-			}
-            const setsTotal = totalPerSet * payableSets;
-            
+            let freeSets = calculateFreeSetsForDirectShipping(numberOfSets);
+    
+            // Apply discount logic
+            if (currentSelections.discount && (currentSelections.paymentMethod === "direct-shipping" || currentSelections.paymentMethod === "none")) {
+                payableSets = numberOfSets - freeSets;
+            } else {
+                // Normal calculation
+                payableSets = numberOfSets;
+            }
+    
             // Calculate one-time fees (Map layout, layout fee, rush fee, and flat add-ons NOT in price per set)
             let oneTimeFeesTotal = 0;
+            const setsTotal = totalPerSet * payableSets;
+            let oneTimeFeesText = "";
             let oneTimeFeesHTML = "";
             
             Object.keys(currentSelections.addons).forEach(addonId => {
@@ -1442,6 +1447,11 @@
                     // Show "FREE layout" or "Own layout" even without fee
                     oneTimeFeesHTML += `<div class="summary-line">${layoutSummary}</div>`;
                 }
+            }
+            
+            // Show free sets after layout (when not discounted)
+            if (!currentSelections.discount && freeSets > 0) {
+                oneTimeFeesHTML += `<div class="summary-line">FREE ${freeSets} set${freeSets > 1 ? 's' : ''}</div>`;
             }
             
             // Add rush fee to one-time fees if applicable
@@ -1528,7 +1538,7 @@
             const shippingFee = calculateShippingFee(finalTotal);
             const courierNames = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC' };
             const courierLabel = courierNames[courier] || 'SPX';
-            const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} (${courierLabel})` : 'FREE Shipping';
+            const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} shipping fee (${courierLabel})` : 'FREE Shipping';
             
             // Calculate free sets for display (for non-discount case)
             const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
@@ -1538,64 +1548,15 @@
             // Calculate downpayment (50% of final total including shipping)
             const downpayment = roundToWholeNumber(finalTotal / 2);
             const balance = finalTotal - downpayment;
-            const shopeeCOD = roundToWholeNumber(balance * 1.15); // 15% additional for COD
             
-            // Show payment methods based on selection
-            if (currentSelections.paymentMethod === "none") {
-                // Show both Direct Shipping and Shopee Checkout
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Direct shipping</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            Balance before ship out: ₱${balance}<br>
-                            ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                            ${shippingLabel}
-                        </div>
-                    </div>
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Shopee Checkout (15% add)</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            COD: ₱${shopeeCOD} ${shippingFee > 0 ? `+ shipping fee` : ''}
-                        </div>
-                    </div>
-                `;
-            } else if (currentSelections.paymentMethod === "direct-shipping") {
-                // Show only Direct Shipping
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Direct shipping</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            Balance before ship out: ₱${balance}<br>
-                            ${displayFreeSets > 0 ? `FREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}<br>` : ''}
-                            ${shippingLabel}
-                        </div>
-                    </div>
-                `;
-            } else if (currentSelections.paymentMethod === "shopee-checkout") {
-                // Show only Shopee Checkout (COD)
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Shopee Checkout (15% add)</div>
-                        <div class="payment-method-details">
-                            Downpayment: ₱${downpayment}<br>
-                            COD: ₱${shopeeCOD} ${shippingFee > 0 ? `+ shipping fee` : ''}
-                        </div>
-                    </div>
-                `;
-            } else if (currentSelections.paymentMethod === "shopee-checkout-full") {
-                // Show only Shopee Checkout Full Payment
-                paymentMethodsHTML += `
-                    <div class="payment-method-option">
-                        <div class="payment-method-title">Shopee Checkout Full Payment</div>
-                        <div class="payment-method-details">
-                            Full Payment: ₱${finalTotal} ${shippingFee > 0 ? `+ shipping fee` : ''}
-                        </div>
-                    </div>
-                `;
-            }
+            // Direct shipping details only
+            paymentMethodsHTML += `
+                <div class="payment-method-details">
+                    Downpayment: ₱${downpayment}<br>
+                    Balance before ship out: ₱${balance}<br>
+                    ${shippingLabel}
+                </div>
+            `;
             
             // Add discount note if applicable
             if (currentSelections.discount && freeSets > 0) {
@@ -1954,8 +1915,9 @@ function copyQuotation() {
         const days = parseInt(currentSelections.rush.type) || 7;
         const rates = {7: 10, 3: 15, 1: 20};
         const perSet = rates[days] || 10;
-        rushFee = 100 + (perSet * numberOfSets);
-        rushSummary = `${days} days production: ₱${rushFee}`;
+        const layoutRush = currentSelections.layout.type === 'own-layout' ? 0 : 100;
+        rushFee = layoutRush + (perSet * numberOfSets);
+        rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
     }
     
     // Calculate price per set (including flat add-ons except Map layout)
@@ -1984,7 +1946,7 @@ function copyQuotation() {
     
     // Calculate sets total (price for all sets)
     let payableSets = numberOfSets;
-    let freeSets = 0;
+    let freeSets = calculateFreeSetsForDirectShipping(numberOfSets);
     
     // Apply discount logic
     if (currentSelections.paymentMethod === "direct-shipping" || currentSelections.paymentMethod === "none") {
@@ -2052,10 +2014,10 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     // Calculate payment details - NEW LOGIC: For direct shipping, subtract free sets from total
     const shippingFee = calculateShippingFee(finalTotal);
+    const courierLabel = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC' }[courier] || 'SPX';
     const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
     const downpayment = roundToWholeNumber(finalTotal / 2);
     const balance = finalTotal - downpayment;
-    const shopeeCOD = roundToWholeNumber(balance * 1.15); // 15% additional for COD
     
     const eventType = currentSelections.eventType.name;
     const eventTitle = eventType === "Special event" ? "Special event invitation" : `${eventType} invitation`;
@@ -2139,7 +2101,7 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
         quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
     }
     if (shippingFee > 0) {
-        quotationText += `\n+ ₱${shippingFee} Shipping fee`;
+        quotationText += `\n+ ₱${shippingFee} shipping fee (${courierLabel})`;
     } else {
         quotationText += `\nFREE Shipping`;
     }
