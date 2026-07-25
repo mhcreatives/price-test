@@ -951,7 +951,6 @@
             document.getElementById('envelope-select').addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
                 currentSelections.envelope = { value: this.value, price: parseInt(opt.getAttribute('data-price')), name: opt.text, custom: false, color: "", texture: "" };
-                updateEnvelopeCheckbox();
                 updateSummary();
                 saveToLocalStorage();
             });
@@ -2245,10 +2244,92 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     updateSummary();
 }
 		
+        function parseOrderForm(text) {
+            resetSelectionsOnly();
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+            const get = (key) => {
+                const line = lines.find(l => l.toLowerCase().startsWith(key.toLowerCase()));
+                return line ? line.split(':').slice(1).join(':').trim() : '';
+            };
+            
+            // Event Type
+            const eventType = get('Event Type');
+            if (eventType) document.getElementById('event-type-select').value = eventType.toLowerCase();
+            
+            // Event Date
+            const eventDate = get('Event Date');
+            if (eventDate) {
+                // Parse "August 30" format
+                const months = { january:'01', february:'02', march:'03', april:'04', may:'05', june:'06', july:'07', august:'08', september:'09', october:'10', november:'11', december:'12' };
+                const parts = eventDate.split(' ');
+                if (parts.length === 2) {
+                    const m = months[parts[0].toLowerCase()];
+                    const d = parseInt(parts[1]) || 1;
+                    if (m) {
+                        const year = new Date().getFullYear();
+                        document.getElementById('event-date-input').value = `${year}-${m}-${String(d).padStart(2,'0')}`;
+                    }
+                }
+            }
+            
+            // Own layout
+            const ownLayout = get('Do you have your own layout');
+            if (ownLayout && ownLayout.toLowerCase().includes('yes')) {
+                document.getElementById('layout-checkbox').checked = true;
+                document.getElementById('layout-type').value = 'own-layout';
+                currentSelections.layout = { required: true, type: 'own-layout', pages: 1 };
+            }
+            
+            // Rush order
+            const rushOrder = get('Is this for a rush order');
+            const dateNeeded = get('Date Needed');
+            if ((rushOrder && rushOrder.toLowerCase().includes('yes')) || dateNeeded) {
+                document.getElementById('rush-checkbox').checked = true;
+                currentSelections.rush = { required: true, type: '7' };
+            }
+            
+            // Order Quantity
+            const qty = get('Order Quantity');
+            if (qty) {
+                const num = parseInt(qty.replace(/[^0-9]/g, '')) || 20;
+                document.getElementById('sets-input').value = num;
+                currentSelections.numberOfSets = num;
+            }
+            
+            // Province → location
+            const province = get('Province');
+            if (province) {
+                const p = province.toLowerCase();
+                let loc = '';
+                if (p.includes('negros') || p.includes('cebu') || p.includes('visayas')) loc = 'visayas';
+                else if (p.includes('metro manila') || p.includes('ncr')) loc = 'ncr';
+                else if (p.includes('mindanao') || p.includes('davao')) loc = 'mindanao';
+                else if (p.includes('luzon')) {
+                    if (p.includes('north')) loc = 'north-luzon';
+                    else if (p.includes('south')) loc = 'south-luzon';
+                    else loc = 'central-luzon';
+                }
+                if (loc) {
+                    document.getElementById('location-select').value = loc;
+                    currentSelections.location = loc;
+                }
+            }
+            
+            updateSummary();
+            saveToLocalStorage();
+            alert('Order form parsed! Check the settings and adjust as needed.');
+        }
+        
 		function importQuotation() {
     const importText = document.getElementById('import-textarea').value.trim();
     if (!importText) {
         alert('Please paste a quotation summary to import.');
+        return;
+    }
+    
+    // Detect order form format
+    if (importText.includes('Inquiry Form') || importText.includes('Event Type:')) {
+        parseOrderForm(importText);
         return;
     }
     
@@ -2261,31 +2342,21 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
         
         // Parse event type
         for (const line of lines) {
-            if (line.toLowerCase().includes('wedding')) {
-                selectOptionCard('event-type-options', 'wedding');
-                break;
-            } else if (line.toLowerCase().includes('debut')) {
-                selectOptionCard('event-type-options', 'debut');
-                break;
-            } else if (line.toLowerCase().includes('birthday')) {
-                selectOptionCard('event-type-options', 'birthday');
-                break;
-            } else if (line.toLowerCase().includes('baptism')) {
-                selectOptionCard('event-type-options', 'baptism');
-                break;
-            } else if (line.toLowerCase().includes('special event')) {
-                selectOptionCard('event-type-options', 'special-event');
-                break;
-            }
+            const l = line.toLowerCase();
+            if (l.includes('wedding')) { document.getElementById('event-type-select').value = 'wedding'; break; }
+            else if (l.includes('debut')) { document.getElementById('event-type-select').value = 'debut'; break; }
+            else if (l.includes('birthday')) { document.getElementById('event-type-select').value = 'birthday'; break; }
+            else if (l.includes('baptism')) { document.getElementById('event-type-select').value = 'baptism'; break; }
+            else if (l.includes('special event')) { document.getElementById('event-type-select').value = 'special-event'; break; }
         }
         
         // Parse size
         for (const line of lines) {
             if (line.toLowerCase().includes('4r') && !line.toLowerCase().includes('5r')) {
-                selectOptionCard('size-options', '4r');
+                document.getElementById('size-select').value = '4r';
                 break;
             } else if (line.toLowerCase().includes('5r')) {
-                selectOptionCard('size-options', '5r');
+                document.getElementById('size-select').value = '5r';
                 break;
             }
         }
@@ -2313,7 +2384,7 @@ for (const line of lines) {
     
     // First check for "no envelope"
     if (lowerLine.includes('no envelope')) {
-        selectOptionCard('envelope-options', 'no-envelope');
+        document.getElementById('envelope-select').value = 'no-envelope';
         // Reset custom envelope
         currentSelections.envelope.custom = false;
         currentSelections.envelope.color = "";
@@ -2328,11 +2399,11 @@ for (const line of lines) {
     // Check for specific envelope types
     for (const [key, value] of Object.entries(envelopeMap)) {
         if (lowerLine.includes(key) && lowerLine.includes('envelope')) {
-            selectOptionCard('envelope-options', value);
+            document.getElementById('envelope-select').value = value;
             
             // IMPORTANT: Store the envelope type first
-            const envelopeName = document.querySelector(`#envelope-options .option-card[data-value="${value}"] .option-name`).textContent;
-            currentSelections.envelope.name = envelopeName;
+            const envelopeName = document.querySelector(`#envelope-select option[value="${value}"]`).textContent;
+            currentSelections.envelope.name = envelopeName || key;
             
             // Parse custom envelope details from this line
             parseCustomEnvelopeDetails(line);
@@ -2436,7 +2507,7 @@ function parseCustomEnvelopeDetails(line) {
         
         for (const [key, value] of Object.entries(paperMap)) {
             if (lowerLine.includes(key) && lowerLine.includes('paper')) {
-                selectOptionCard('paper-options', paperMap[key]);
+                document.getElementById('paper-select').value = paperMap[key];
                 break;
             }
         }
@@ -2468,7 +2539,7 @@ function parseCustomEnvelopeDetails(line) {
             const lowerLine = line.toLowerCase();
             for (const [key, value] of Object.entries(sealMap)) {
                 if (lowerLine.includes(key)) {
-                    selectOptionCard('seal-options', value);
+                    document.getElementById('seal-select').value = value;
                     break;
                 }
             }
