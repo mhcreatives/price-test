@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        html { color-scheme: light only; }
         body { background-color: #ffffff; color: #333333; line-height: 1.5; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         header { text-align: center; padding: 10px 20px; background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px; }
@@ -128,14 +129,14 @@
         @media (max-width: 900px) { .mobile-price-bar { display: flex; } body { padding-bottom: 60px; } }
     /* Mobile responsive */
         @media (max-width: 768px) {
-           .calculator-wrapper { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; }
+           .calculator-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
            .container { padding: 10px; }
-           .result-panel { position: static; max-height: none; height: auto; overflow: visible; align-self: auto; display: block; padding: 8px; font-size: 0.75rem; word-break: break-word; }
-           .result-panel .summary-line { font-size: 0.7rem; }
-           .result-panel .section-title { font-size: 0.85rem; }
-           .result-panel .event-type-title { font-size: 0.9rem; }
-           .result-panel .final-total { font-size: 0.9rem; }
-           .result-panel .copy-button, .result-panel .copy-price-button { font-size: 0.7rem; padding: 6px; height: auto; }
+           .result-panel { position: static !important; max-height: none !important; height: auto; overflow: visible; align-self: auto; display: block; padding: 8px; font-size: 0.7rem; word-break: break-word; background: white !important; color: #333 !important; }
+           .result-panel .summary-line { font-size: 0.65rem; }
+           .result-panel .section-title { font-size: 0.8rem; }
+           .result-panel .event-type-title { font-size: 0.85rem; }
+           .result-panel .final-total { font-size: 0.85rem; }
+           .result-panel .copy-button, .result-panel .copy-price-button { font-size: 0.65rem; padding: 4px; height: auto; }
            .options-panel { position: static; max-height: none; padding: 12px; overflow-y: visible; }
            h1 { font-size: 1.2rem; }
            .input-row { grid-template-columns: 1fr; gap: 8px; }
