@@ -131,12 +131,13 @@
         @media (max-width: 768px) {
            .calculator-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
            .container { padding: 10px; }
-           .result-panel { position: static !important; max-height: none !important; height: auto; overflow: visible; align-self: auto; display: block; padding: 8px; font-size: 0.7rem; word-break: break-word; background: white !important; color: #333 !important; }
-           .result-panel .summary-line { font-size: 0.65rem; }
-           .result-panel .section-title { font-size: 0.8rem; }
-           .result-panel .event-type-title { font-size: 0.85rem; }
-           .result-panel .final-total { font-size: 0.85rem; }
-           .result-panel .copy-button, .result-panel .copy-price-button { font-size: 0.65rem; padding: 4px; height: auto; }
+           .options-panel, .result-panel { min-width: 0; }
+           .result-panel { position: sticky !important; top: 0; max-height: 100vh; overflow-y: auto; height: auto; display: block; padding: 8px; font-size: 0.8rem; word-break: break-word; background: white !important; color: #333 !important; }
+           .result-panel .summary-line { font-size: 0.75rem; }
+           .result-panel .section-title { font-size: 0.9rem; }
+           .result-panel .event-type-title { font-size: 0.95rem; }
+           .result-panel .final-total { font-size: 0.95rem; }
+           .result-panel .copy-button, .result-panel .copy-price-button { font-size: 0.75rem; padding: 6px; height: auto; }
            .options-panel { position: static; max-height: none; padding: 12px; overflow-y: visible; }
            h1 { font-size: 1.2rem; }
            .input-row { grid-template-columns: 1fr; gap: 8px; }
@@ -144,8 +145,9 @@
            .tab-btn { padding: 6px 12px; font-size: 0.85rem; }
            .action-button { padding: 6px; font-size: 0.8rem; height: 36px; }
            select, .select-input { font-size: 16px !important; }
-           [style*="display:flex"][style*="gap:12px"] { flex-direction: column; gap: 8px !important; }
-        }
+           #color-select, #texture-select { width: 100% !important; max-width: 100%; }
+           .envelope-custom-row, .side-row { flex-direction: column !important; gap: 6px !important; }
+           }
         
  
 </style>
@@ -161,7 +163,7 @@
                     <button class="tab-btn" onclick="switchTab('souvenir')">Souvenir</button>
                 </div>
                 <div class="tab-panel active" id="tab-invitation">
-                <div style="display:flex;gap:12px;">
+                <div class="side-row" style="display:flex;gap:12px;">
                     <div class="option-group" style="flex:1;">
                         <label class="option-label">1. Event Type</label>
                         <select class="select-input" id="event-type-select" style="height:40px;font-size:15px;width:100%;">
@@ -179,7 +181,7 @@
                         </select>
                     </div>
                 </div>
-                <div style="display:flex;gap:12px;">
+                <div class="side-row" style="display:flex;gap:12px;">
                     <div class="option-group" style="flex:1;"><label class="option-label">3. Envelope Type</label>
                     <select class="select-input" id="envelope-select" style="height:40px;font-size:15px;width:100%;">
                         <option value="no-envelope" data-price="-5">No envelope</option>
@@ -201,7 +203,7 @@
                     </div>
                 </div>
   
-                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <div class="envelope-custom-row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <div style="display:flex;align-items:center;gap:4px;">
                         <input type="checkbox" id="envelope-checkbox" style="vertical-align: middle;">
                         <label for="envelope-checkbox"></label>
@@ -291,7 +293,7 @@
 				</select>
                     </div>
                 </div>
-                <div style="display:flex;gap:12px;">
+                <div class="side-row" style="display:flex;gap:12px;">
                     <div class="option-group" style="flex:1;"><label class="option-label">5. Paper Type</label>
                     <select class="select-input" id="paper-select" style="height:40px;font-size:15px;width:100%;">
                         <option value="matte" data-price="0" selected>Matte</option>
@@ -339,7 +341,7 @@
                 
                 <!-- Layout & Rush Section -->
                 <div class="layout-rush-section">
-                    <div style="display:flex;gap:12px;">
+                    <div class="side-row" style="display:flex;gap:12px;">
                         <div style="flex:1;">
                             <label class="option-label">Layout Selection</label>
                             <div class="layout-rush-row">
@@ -365,7 +367,7 @@
                 </div>
                 
                 <!-- Location & Courier -->
-                <div style="display:flex;gap:12px;">
+                <div class="side-row" style="display:flex;gap:12px;">
                     <div style="flex:1;">
                         <label class="option-label">Location</label>
                         <select class="select-input" id="location-select">
