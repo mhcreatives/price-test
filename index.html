@@ -569,12 +569,14 @@
 			    {label:'With graphics', price:200},
 			    {label:'With animated monogram/logo', price:200},
 			    {label:'All features', price:400}
-			]}
+			]},
+            { id: 'emboss', name: 'Emboss/Deboss', price: 15, unit: 'page', allowMultiple: true, oneTime: true, dropdown: [
+                {label:'Pattern emboss', price:15}, {label:'Pattern deboss', price:15}, {label:'Custom emboss', price:25}, {label:'Custom deboss', price:25}
+            ] },
             
-
         ];
         
-        // List of flat add-ons that should be included in price per set (excluding Map layout)
+        // List of flat add-ons
         const flatAddonsInPricePerSet = [
             'vellum-jacket',
             'vellum-jacket-print',
@@ -1160,10 +1162,16 @@
             function addSelectedAddon() {
                 const addonId = picker.value;
                 if (!addonId) return;
-                if (currentSelections.addons[addonId]) return;
                 const addon = addonsData.find(a => a.id === addonId);
                 if (!addon) return;
-                currentSelections.addons[addonId] = {
+                let key = addonId;
+                if (addon.allowMultiple) {
+                    let idx = 0;
+                    while (currentSelections.addons[key + '_' + idx]) idx++;
+                    key = key + '_' + idx;
+                } else if (currentSelections.addons[addonId]) return;
+                currentSelections.addons[key] = {
+                    baseId: addonId,
                     name: addon.name,
                     price: addon.price,
                     unit: addon.unit,
@@ -1184,9 +1192,10 @@
         function renderSelectedAddons() {
             const list = document.getElementById('selected-addons-list');
             list.innerHTML = '';
-            Object.keys(currentSelections.addons).forEach(addonId => {
-                const addon = currentSelections.addons[addonId];
-                const orig = addonsData.find(a => a.id === addonId);
+            Object.keys(currentSelections.addons).forEach(key => {
+                const addon = currentSelections.addons[key];
+                const baseId = addon.baseId || key;
+                const orig = addonsData.find(a => a.id === baseId);
                 if (!orig) return;
                 const hasDropdown = addon.hasDropdown || (orig.dropdown && orig.dropdown.length > 0);
                 const isPriceDropdown = addon.isPriceDropdown || (orig.dropdown && typeof orig.dropdown[0] === 'object');
@@ -1198,11 +1207,11 @@
                     const opts = typeof dd[0] === 'object'
                         ? dd.map(o => `<option value="${o.label}" data-price="${o.price}">${o.label}</option>`).join('')
                         : dd.map(v => `<option value="${v}">${v}</option>`).join('');
-                    h += `<select class="select-input" id="variant-${addonId}" style="flex:1;min-width:140px;height:34px;font-size:0.85rem;">${opts}</select>`;
+                    h += `<select class="select-input" id="variant-${key}" style="flex:1;min-width:140px;height:34px;font-size:0.85rem;">${opts}</select>`;
                 }
-                if (orig.unit === 'page') h += `<label>Pages:</label><input type="number" id="qty-${addonId}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
-                else if (orig.unit === 'piece') h += `<label>Pcs:</label><input type="number" id="qty-${addonId}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
-                if (addonId === 'foil' || addonId === 'envelope-print') h += `<label><input type="checkbox" id="fullpage-${addonId}" ${addon.fullPage?'checked':''} style="vertical-align:middle;"> Full page</label>`;
+                if (orig.unit === 'page') h += `<label>Pages:</label><input type="number" id="qty-${key}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
+                else if (orig.unit === 'piece') h += `<label>Pcs:</label><input type="number" id="qty-${key}" value="${addon.quantity||1}" style="width:60px;text-align:center;" min="1">`;
+                if (baseId === 'foil' || baseId === 'envelope-print') h += `<label><input type="checkbox" id="fullpage-${key}" ${addon.fullPage?'checked':''} style="vertical-align:middle;"> Full page</label>`;
                 h += `<button style="padding:4px 10px;background:#e74c3c;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:0.8rem;">✕</button>`;
                 item.innerHTML = h;
                 list.appendChild(item);
@@ -1221,7 +1230,7 @@
                     updateSummary(); saveToLocalStorage();
                 });
                 item.querySelector('button').addEventListener('click', function() {
-                    delete currentSelections.addons[addonId];
+                    delete currentSelections.addons[key];
                     renderSelectedAddons();
                     updateSummary(); saveToLocalStorage();
                 });
@@ -1258,12 +1267,12 @@
                 const addon = currentSelections.addons[addonId];
                 const getAddonDisplayName = (a) => {
                     const base = a.variant ? `${a.variant} ${a.name}` : a.name;
-                    return a.fullPage && addonId !== 'foil' ? `Full page ${base.toLowerCase()}` : base;
+                    return a.fullPage && (addon.baseId || addonId) !== 'foil' ? `Full page ${base.toLowerCase()}` : base;
                 };
                 let addonTotal = 0;
                 
                 if (addon.unit === 'flat') {
-                    if (addonId === 'e-invite') {
+                    if ((addon.baseId || addonId) === 'e-invite') {
                         // E-invite price = P100 × number of inserts (shown in one-time fees only)
                         addonTotal = addon.price * currentSelections.inserts.value;
                     } else {
@@ -1273,19 +1282,19 @@
                         }
                     }
                 } else if (addon.unit === 'page' || addon.unit === 'piece') {
-                    if (addonId === 'solid-color-print' && addon.variant) {
+                    if ((addon.baseId || addonId) === 'solid-color-print' && addon.variant) {
                         addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
                     }
-                    if (addonId === 'envelope-print') {
+                    if ((addon.baseId || addonId) === 'envelope-print' || (addon.baseId || addonId) === 'emboss') {
                         addonTotal = addon.price * addon.quantity;
                     } else {
                         addonTotal = addon.price * addon.quantity * numberOfSets;
                     }
                     const unitText = addon.unit === 'page' ? (addon.quantity === 1 ? 'page' : 'pages') : 
                                     (addon.quantity === 1 ? 'pc' : 'pcs');
-                    if (addonId === 'foil' && addon.fullPage) {
+                    if ((addon.baseId || addonId) === 'foil' && addon.fullPage) {
                         summaryHTML += `<div class="summary-line">1 page ${getAddonDisplayName(addon)} full page</div>`;
-                    } else if (addonId !== 'envelope-print') {
+                    } else if ((addon.baseId || addonId) !== 'envelope-print' && (addon.baseId || addonId) !== 'emboss') {
                         summaryHTML += `<div class="summary-line">${addon.quantity} ${unitText} ${getAddonDisplayName(addon)}</div>`;
                     }
                 }
@@ -1441,13 +1450,13 @@
             Object.keys(currentSelections.addons).forEach(addonId => {
                 const addon = currentSelections.addons[addonId];
                 
-                if (addonId === 'map-layout') {
+                if ((addon.baseId || addonId) === 'map-layout') {
                     // Map layout is NOT included in price per set (it's a one-time fee)
                     return;
                 }
                 
                 // Update dynamic prices from pages input
-                if (addonId === 'solid-color-print' && addon.variant) {
+                if ((addon.baseId || addonId) === 'solid-color-print' && addon.variant) {
                     addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
                 }
                 
@@ -1460,7 +1469,7 @@
                     // Note: flat add-ons NOT in the list are treated as one-time fees
                 } else {
                     // For per-page/per-piece add-ons, add their price to price per set
-                    if (addonId !== 'envelope-print') {
+                    if ((addon.baseId || addonId) !== 'envelope-print' && (addon.baseId || addonId) !== 'emboss') {
                         addonPricePerSet += addon.price * addon.quantity;
                     }
                 }
@@ -1489,20 +1498,25 @@
             Object.keys(currentSelections.addons).forEach(addonId => {
                 const addon = currentSelections.addons[addonId];
                 
-                if (addonId === 'map-layout') {
+                if ((addon.baseId || addonId) === 'map-layout') {
                     // Map layout is always a one-time fee
                     oneTimeFeesTotal += addon.price;
                     oneTimeFeesHTML += `<div class="summary-line">Map layout: ₱${addon.price}</div>`;
-                } else if (addonId === 'e-invite') {
+                } else if ((addon.baseId || addonId) === 'e-invite') {
                     // E-invite is a one-time fee: P100 × number of inserts
                     const eInviteTotal = addon.price * currentSelections.inserts.value;
                     oneTimeFeesTotal += eInviteTotal;
                     oneTimeFeesHTML += `<div class="summary-line">E-invite (${currentSelections.inserts.value} ${currentSelections.inserts.value === 1 ? 'page' : 'pages'}): ₱${eInviteTotal}</div>`;
-                } else if (addonId === 'envelope-print') {
+                } else if ((addon.baseId || addonId) === 'envelope-print') {
                     const epTotal = addon.price * (addon.quantity || 1);
                     oneTimeFeesTotal += epTotal;
                     const displayName = addon.fullPage ? 'Full page envelope print' : 'Envelope print';
                     oneTimeFeesHTML += `<div class="summary-line">${addon.quantity || 1} pcs ${displayName}: ₱${epTotal}</div>`;
+                } else if ((addon.baseId || addonId) === 'emboss') {
+                    const embTotal = addon.price * (addon.quantity || 1);
+                    oneTimeFeesTotal += embTotal;
+                    const displayName = addon.variant ? `${addon.variant}` : 'Emboss/Deboss';
+                    oneTimeFeesHTML += `<div class="summary-line">${addon.quantity || 1} pages ${displayName}: ₱${embTotal}</div>`;
                 } else if (addon.unit === 'flat' && !flatAddonsInPricePerSet.includes(addonId)) {
                     // Flat add-ons NOT in the price-per-set list are one-time fees
                     oneTimeFeesTotal += addon.price;
@@ -1876,13 +1890,13 @@
     Object.keys(currentSelections.addons).forEach(addonId => {
         const addon = currentSelections.addons[addonId];
         
-        if (addonId === 'map-layout') {
+        if ((addon.baseId || addonId) === 'map-layout') {
             // Map layout is NOT included in price per set
             return;
         }
         
         // Update dynamic prices from inserts
-        if (addonId === 'solid-color-print' && addon.variant) {
+        if ((addon.baseId || addonId) === 'solid-color-print' && addon.variant) {
             addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
         }
         
@@ -2003,13 +2017,13 @@ function copyQuotation() {
     Object.keys(currentSelections.addons).forEach(addonId => {
         const addon = currentSelections.addons[addonId];
         
-        if (addonId === 'map-layout') {
+        if ((addon.baseId || addonId) === 'map-layout') {
             // Map layout is NOT included in price per set (it's a one-time fee)
             return;
         }
         
         // Update dynamic prices from inserts
-        if (addonId === 'solid-color-print' && addon.variant) {
+        if ((addon.baseId || addonId) === 'solid-color-print' && addon.variant) {
             addon.price = calculateSolidColorPrice(addon.variant, addon.quantity || 1) / (addon.quantity || 1);
         }
         
@@ -2053,11 +2067,11 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     Object.keys(currentSelections.addons).forEach(addonId => {
         const addon = currentSelections.addons[addonId];
         
-        if (addonId === 'map-layout') {
+        if ((addon.baseId || addonId) === 'map-layout') {
             // Map layout is always a one-time fee
             oneTimeFeesTotal += addon.price;
             oneTimeFeesText += `Map layout: ₱${addon.price}\n`;
-        } else if (addonId === 'e-invite') {
+        } else if ((addon.baseId || addonId) === 'e-invite') {
             // E-invite: P100 × number of inserts
             const eInviteTotal = addon.price * currentSelections.inserts.value;
             oneTimeFeesTotal += eInviteTotal;
