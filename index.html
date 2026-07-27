@@ -334,7 +334,7 @@
                 </div>
                 
                 <div class="input-row">
-                    <div class="input-group"><label class="input-label">Number of Sets</label><input type="number" class="text-input" id="sets-input" min="1" max="1000" value="20" oninput="this.value = Math.max(1, parseInt(this.value) || 1)"></div>
+                    <div class="input-group"><label class="input-label">Number of Sets</label><input type="number" class="text-input" id="sets-input" min="1" max="1000" value="20" onchange="this.value = Math.max(1, parseInt(this.value) || 1)"></div>
                     <div class="discount-checkbox" style="align-self:end;margin-bottom:15px;padding:4px 8px;"><input type="checkbox" id="discount-checkbox"><label for="discount-checkbox">Discount</label></div>
                     <div class="input-group" style="margin-left:-8px;"><label class="input-label">Event Date</label><input type="date" class="date-input" id="event-date-input" value=""></div>
                 </div>
@@ -446,7 +446,7 @@
                 </div>
                 <div class="input-group">
                     <label class="input-label">Passport Quantity</label>
-                    <input type="number" class="text-input" id="passport-sets-input" min="1" max="1000" value="20" oninput="this.value = Math.max(1, parseInt(this.value) || 1)">
+                    <input type="number" class="text-input" id="passport-sets-input" min="1" max="1000" value="20" onchange="this.value = Math.max(1, parseInt(this.value) || 1)">
                 </div>
                 <div class="option-group">
                     <label class="option-label">Layout</label>
@@ -1214,8 +1214,9 @@
                     updateSummary(); saveToLocalStorage();
                 });
                 const qi = item.querySelector('input[type="number"]');
-                if (qi) qi.addEventListener('input', function() {
+                if (qi) qi.addEventListener('change', function() {
                     addon.quantity = Math.max(1, parseInt(this.value) || 1);
+                    this.value = addon.quantity;
                     updateSummary(); saveToLocalStorage();
                 });
                 item.querySelector('button').addEventListener('click', function() {
