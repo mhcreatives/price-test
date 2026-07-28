@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MH Creatives — Daily Leads & Orders</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #111; color: #eee; padding: 30px; }
+  h2 { text-align: center; margin-bottom: 5px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 1200px; margin: 0 auto; }
+  .full { grid-column: 1 / -1; }
+  canvas { background: #1a1a1a; border-radius: 8px; padding: 10px; }
+</style>
+</head>
+<body>
+
+<h2>MH Creatives — Daily Leads & Orders (Jun 27 – Jul 27)</h2>
+
+<div class="grid">
+  <div class="full"><canvas id="leadsOrders"></canvas></div>
+  <div><canvas id="conversion"></canvas></div>
+  <div><canvas id="spendMsgs"></canvas></div>
+  <div class="full"><canvas id="value"></canvas></div>
+</div>
+
+<script>
+const dates = ['Jun 27','Jun 28','Jun 29','Jun 30','Jul 1','Jul 2','Jul 3','Jul 4','Jul 5','Jul 6','Jul 7','Jul 8','Jul 9','Jul 10','Jul 11','Jul 12','Jul 13','Jul 14','Jul 15','Jul 16','Jul 17','Jul 18','Jul 19','Jul 20','Jul 21','Jul 22','Jul 23','Jul 24','Jul 25','Jul 26','Jul 27'];
+
+const leads = [49,81,80,63,79,59,67,73,90,86,87,76,85,68,95,94,97,91,73,62,78,95,106,90,86,91,104,101,59,90,80];
+const orders = [7,6,10,9,9,11,6,11,10,14,9,11,5,0,0,12,12,3,2,11,5,4,2,11,7,5,5,2,8,6,10];
+const spend = [3085,3580,4082,3794,3910,3319,3079,2734,3535,3979,3673,3564,3399,3158,3310,4205,4533,4352,3812,3693,3729,3755,4107,4327,4127,4210,4220,4037,3894,3500,4000];
+const msgs = [68,112,112,114,117,100,93,96,112,139,99,111,126,105,108,128,139,125,112,94,98,123,128,138,122,113,126,134,104,100,115];
+const dp = [7963,5525,12360,11234,25764,15580,7290,15381,14499,24515,8930,17053,8788,0,0,17335,14516,4015,4108,14537,15812,4000,3025,16060,8862,17846,5018,1495,12180,13455,15813];
+const value = [24525,10350,28564,26890,52052,33930,18545,31664,29124,52704,18139,30919,23805,0,0,34235,35258,8300,10390,27264,31909,8370,6525,33203,15523,35185,10125,3590,23900,23430,33010];
+const l7d = [77,80,80,73,67,57,35,49,81,80,63,79,59,67,73,90,86,87,76,85,68,95,94,97,91,73,62,78,95,106,90];
+const cv = [14,7,12,14,11,19,9,15,11,16,10,14,6,null,null,13,12,3,3,18,6,4,2,12,8,5,5,2,14,7,12];
+const cv7 = [9,8,12,12,13,19,17,22,12,18,14,14,8,null,null,13,14,3,3,13,7,4,2,11,8,7,8,3,8,6,11];
+
+// Leads + Orders + L-7d
+new Chart(document.getElementById('leadsOrders'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [
+      { label: 'Leads 7d ago', data: l7d, borderColor: '#4a9eff', tension: 0.3, pointRadius: 2 },
+      { label: 'Orders', data: orders, borderColor: '#ff6b6b', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, borderWidth: 2, yAxisID: 'y1' },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#aaa' } }, title: { display: true, text: 'Leads (7d lag) → Orders', color: '#fff', font: { size: 16 } } },
+    scales: {
+      x: { ticks: { color: '#888', maxRotation: 45 }, grid: { color: '#333' } },
+      y: { ticks: { color: '#888' }, grid: { color: '#333' }, title: { display: true, text: 'Leads', color: '#aaa' } },
+      y1: { position: 'right', ticks: { color: '#ff6b6b', callback: v => v }, grid: { display: false }, title: { display: true, text: 'Orders', color: '#ff6b6b' } }
+    }
+  }
+});
+
+// Conversion rates
+new Chart(document.getElementById('conversion'), {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [
+      { label: 'Cv% (same day)', data: cv, borderColor: '#ffd700', tension: 0.3, pointRadius: 2 },
+      { label: 'Cv7% (7d lag)', data: cv7, borderColor: '#4a9eff', borderDash: [5,5], tension: 0.3, pointRadius: 2 },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#aaa' } }, title: { display: true, text: 'Conversion Rate %', color: '#fff', font: { size: 16 } } },
+    scales: {
+      x: { ticks: { color: '#888', maxRotation: 45 }, grid: { color: '#333' } },
+      y: { ticks: { color: '#888', callback: v => v + '%' }, grid: { color: '#333' } }
+    }
+  }
+});
+
+// Spend + Messages
+new Chart(document.getElementById('spendMsgs'), {
+  type: 'bar',
+  data: {
+    labels: dates,
+    datasets: [
+      { label: 'Spend', data: spend, backgroundColor: '#ffd70066', borderColor: '#ffd700', borderWidth: 1, yAxisID: 'y' },
+      { label: 'Messages', data: msgs, type: 'line', borderColor: '#4a9eff', tension: 0.3, pointRadius: 2, yAxisID: 'y1' },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#aaa' } }, title: { display: true, text: 'Daily Spend & Messages', color: '#fff', font: { size: 16 } } },
+    scales: {
+      x: { ticks: { color: '#888', maxRotation: 45 }, grid: { color: '#333' } },
+      y: { ticks: { color: '#ffd700', callback: v => 'P' + v }, grid: { color: '#333' }, title: { display: true, text: 'Spend', color: '#ffd700' } },
+      y1: { position: 'right', ticks: { color: '#4a9eff' }, grid: { display: false }, title: { display: true, text: 'Msgs', color: '#4a9eff' } }
+    }
+  }
+});
+
+// Total Value + DP
+new Chart(document.getElementById('value'), {
+  type: 'bar',
+  data: {
+    labels: dates,
+    datasets: [
+      { label: 'Total DP', data: dp, backgroundColor: '#ff6b6b66', borderColor: '#ff6b6b', borderWidth: 1 },
+      { label: 'Total Value', data: value, backgroundColor: '#4caf5066', borderColor: '#4caf50', borderWidth: 1 },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#aaa' } }, title: { display: true, text: 'Daily Revenue (DP + Total Value)', color: '#fff', font: { size: 16 } } },
+    scales: {
+      x: { ticks: { color: '#888', maxRotation: 45 }, grid: { color: '#333' } },
+      y: { ticks: { color: '#888', callback: v => 'P' + (v/1000) + 'k' }, grid: { color: '#333' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
