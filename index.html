@@ -2375,6 +2375,7 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
         return;
     }
     
+    setTimeout(() => {
     try {
         // Parse the quotation text
         const lines = importText.split('\n').map(line => line.trim()).filter(line => line);
@@ -2779,6 +2780,7 @@ for (const line of lines) {
         console.error('Error importing quotation:', error);
         alert('Error importing quotation. Please check the format and try again.');
     }
+    }, 0);
 }
 
 // Helper function to select option cards
