@@ -1322,7 +1322,7 @@
         function calculateShippingFee(totalAmount) {
             // Courier base prices
             const courierPrices = { 'spx': 100, 'jnt': 150, 'lbc': 200, 'lalamove': 0 };
-            let baseFee = courierPrices[courier] || 100;
+            let baseFee = courierPrices[courier] !== undefined ? courierPrices[courier] : 100;
             
             // Order total multiplier (not applicable to LBC)
             let totalMultiplier = 1;
@@ -1626,7 +1626,7 @@
             const shippingFee = calculateShippingFee(finalTotal);
             const courierNames = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC', lalamove: 'Lalamove' };
             const courierLabel = courierNames[courier] || 'SPX';
-            const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} shipping fee (${courierLabel})` : 'FREE Shipping';
+            const shippingLabel = courier === 'lalamove' ? '' : (shippingFee > 0 ? `+ ₱${shippingFee} shipping fee (${courierLabel})` : 'FREE Shipping');
             
             // Calculate free sets for display (for non-discount case)
             const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
@@ -2198,10 +2198,12 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     if (displayFreeSets > 0) {
         quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
     }
+    if (courier !== 'lalamove') {
     if (shippingFee > 0) {
         quotationText += `\n+ ₱${shippingFee} shipping fee (${courierLabel})`;
     } else {
         quotationText += `\nFREE Shipping`;
+    }
     }
     
     // Add discount note if applicable
