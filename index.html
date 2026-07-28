@@ -387,6 +387,7 @@
                             <option value="spx" selected>SPX Express</option>
                             <option value="jnt">J&T Express</option>
                             <option value="lbc">LBC</option>
+                            <option value="lalamove">Lalamove</option>
                         </select>
                     </div>
                 </div>
@@ -1320,7 +1321,7 @@
         
         function calculateShippingFee(totalAmount) {
             // Courier base prices
-            const courierPrices = { 'spx': 100, 'jnt': 150, 'lbc': 200 };
+            const courierPrices = { 'spx': 100, 'jnt': 150, 'lbc': 200, 'lalamove': 0 };
             let baseFee = courierPrices[courier] || 100;
             
             // Order total multiplier (not applicable to LBC)
@@ -1623,7 +1624,7 @@
             const paymentMethodsSection = document.getElementById('payment-methods-section');
             const locationName = currentSelections.location ? locationNames[currentSelections.location] : '';
             const shippingFee = calculateShippingFee(finalTotal);
-            const courierNames = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC' };
+            const courierNames = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC', lalamove: 'Lalamove' };
             const courierLabel = courierNames[courier] || 'SPX';
             const shippingLabel = shippingFee > 0 ? `+ ₱${shippingFee} shipping fee (${courierLabel})` : 'FREE Shipping';
             
@@ -2111,7 +2112,7 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     
     // Calculate payment details - NEW LOGIC: For direct shipping, subtract free sets from total
     const shippingFee = calculateShippingFee(finalTotal);
-    const courierLabel = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC' }[courier] || 'SPX';
+    const courierLabel = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC', lalamove: 'Lalamove' }[courier] || 'SPX';
     const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
     const downpayment = roundToWholeNumber(finalTotal / 2);
     const balance = finalTotal - downpayment;
@@ -2723,14 +2724,8 @@ for (const line of lines) {
         const hasDirectShipping = lines.some(line => line.toLowerCase().includes('direct shipping'));
         const hasShopeeCheckout = lines.some(line => line.toLowerCase().includes('shopee checkout'));
         
-        if (hasDirectShipping && hasShopeeCheckout) {
-            selectOptionCard('payment-method-options', 'none'); // Show All
-        } else if (hasDirectShipping) {
-            selectOptionCard('payment-method-options', 'direct-shipping');
-        } else if (hasShopeeCheckout && lines.some(line => line.toLowerCase().includes('full payment'))) {
-            selectOptionCard('payment-method-options', 'shopee-checkout-full');
-        } else if (hasShopeeCheckout) {
-            selectOptionCard('payment-method-options', 'shopee-checkout');
+        if (hasDirectShipping || hasShopeeCheckout) {
+            currentSelections.paymentMethod = 'direct-shipping';
         }
         
         // Parse add-ons (simplified version)
