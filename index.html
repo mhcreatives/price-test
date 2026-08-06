@@ -1626,7 +1626,7 @@
             const shippingFee = calculateShippingFee(finalTotal);
             const courierNames = { spx: 'SPX Express', jnt: 'J&T Express', lbc: 'LBC', lalamove: 'Lalamove' };
             const courierLabel = courierNames[courier] || 'SPX';
-            const shippingLabel = courier === 'lalamove' ? '' : (shippingFee > 0 ? `+ ₱${shippingFee} shipping fee (${courierLabel})` : 'FREE Shipping');
+            const shippingLabel = courier === 'lalamove' ? 'Lalamove' : (shippingFee > 0 ? `+ ₱${shippingFee} shipping fee (${courierLabel})` : 'FREE Shipping');
             
             // Calculate free sets for display (for non-discount case)
             const displayFreeSets = currentSelections.discount ? 0 : calculateFreeSetsForDirectShipping(numberOfSets);
@@ -2198,7 +2198,9 @@ if (currentSelections.discount && (currentSelections.paymentMethod === "direct-s
     if (displayFreeSets > 0) {
         quotationText += `\nFREE ${displayFreeSets} set${displayFreeSets > 1 ? 's' : ''}`;
     }
-    if (courier !== 'lalamove') {
+    if (courier === 'lalamove') {
+        quotationText += `\nLalamove`;
+    } else {
     if (shippingFee > 0) {
         quotationText += `\n+ ₱${shippingFee} shipping fee (${courierLabel})`;
     } else {
