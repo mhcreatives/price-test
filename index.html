@@ -284,6 +284,7 @@
 					<option value="Vista">Vista</option>
 					<option value="White">White</option>
 					<option value="Yellow gold">Yellow gold</option>
+					<option value="Zanzibar Gold">Zanzibar Gold</option>
 
 				</select>
 				<select class="select-input" id="texture-select" style="vertical-align: middle; height: 40px; width: 160px; font-size: 15px; margin-right: 10px;">
@@ -651,6 +652,14 @@
                 options: [
                     {label: 'Plain', price: 35},
                     {label: 'Colored', price: 40}
+                ]
+            },
+            {
+                id: 'table-cards', name: 'Table Cards', unit: 'piece',
+                options: [
+                    {label: 'Flat', price: 15},
+                    {label: 'Folded', price: 20},
+                    {label: 'Trifold', price: 30}
                 ]
             }
         ];
@@ -1047,7 +1056,8 @@
 			
 			document.getElementById('inserts-input').addEventListener('input', function() {
                 const insertCount = parseInt(this.value) || 0;
-                const insertPrice = insertCount * INSERT_PRICE;
+                const perInsertPrice = insertCount >= 5 ? 10 : INSERT_PRICE;
+                const insertPrice = insertCount * perInsertPrice;
                 currentSelections.inserts = { value: insertCount, price: insertPrice };
                 updateSummary();
                 saveToLocalStorage();
@@ -1365,6 +1375,8 @@
         function updateSummary() {
             const sizePrice = currentSelections.size.price;
             const envelopePrice = currentSelections.envelope.price;
+            // Color surcharge
+            const colorSurcharge = currentSelections.envelope.color === 'Zanzibar Gold' ? 10 : 0;
             const insertsPrice = currentSelections.inserts.price;
             const paperPrice = currentSelections.paper.price;
             const sealPrice = currentSelections.seal.price;
@@ -1443,7 +1455,7 @@
                 const perSet = rates[days] || 10;
                 const layoutRush = currentSelections.layout.type === 'own-layout' ? 0 : 100;
                 rushFee = layoutRush + (perSet * numberOfSets);
-                rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
+                rushSummary = `Rush fee: ₱${rushFee} (${days} ${days === 1 ? 'day' : 'days'} production)`;
             }
             
             // Calculate price per set (including flat add-ons except Map layout)
@@ -1476,7 +1488,7 @@
                 }
             });
             
-            const totalPerSet = BASE_PRICE + sizePrice + envelopePrice + insertsPrice + paperPrice + sealPrice + addonPricePerSet;
+            const totalPerSet = BASE_PRICE + sizePrice + envelopePrice + insertsPrice + paperPrice + sealPrice + addonPricePerSet + colorSurcharge;
             
             // Calculate sets total (price for all sets)
             let payableSets = numberOfSets;
@@ -1945,6 +1957,7 @@
 function copyQuotation() {
     const sizePrice = currentSelections.size.price;
     const envelopePrice = currentSelections.envelope.price;
+    const colorSurcharge = currentSelections.envelope.color === 'Zanzibar Gold' ? 10 : 0;
     const insertsPrice = currentSelections.inserts.price;
     const paperPrice = currentSelections.paper.price;
     const sealPrice = currentSelections.seal.price;
@@ -2010,7 +2023,7 @@ function copyQuotation() {
         const perSet = rates[days] || 10;
         const layoutRush = currentSelections.layout.type === 'own-layout' ? 0 : 100;
         rushFee = layoutRush + (perSet * numberOfSets);
-        rushSummary = `Rush fee: ₱${rushFee} (${days} days production)`;
+        rushSummary = `Rush fee: ₱${rushFee} (${days} ${days === 1 ? 'day' : 'days'} production)`;
     }
     
     // Calculate price per set (including flat add-ons except Map layout)
@@ -2040,7 +2053,7 @@ function copyQuotation() {
         }
     });
     
-    const totalPerSet = BASE_PRICE + sizePrice + envelopePrice + insertsPrice + paperPrice + sealPrice + addonPricePerSet;
+    const totalPerSet = BASE_PRICE + sizePrice + envelopePrice + insertsPrice + paperPrice + sealPrice + addonPricePerSet + colorSurcharge;
     
     // Calculate sets total (price for all sets)
     let payableSets = numberOfSets;
