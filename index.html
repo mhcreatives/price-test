@@ -1057,7 +1057,7 @@
 			document.getElementById('inserts-input').addEventListener('input', function() {
                 const insertCount = parseInt(this.value) || 0;
                 const perInsertPrice = insertCount >= 5 ? 10 : INSERT_PRICE;
-                const insertPrice = insertCount * perInsertPrice;
+                const insertPrice = Math.min(insertCount, 4) * INSERT_PRICE + Math.max(0, insertCount - 4) * perInsertPrice;
                 currentSelections.inserts = { value: insertCount, price: insertPrice };
                 updateSummary();
                 saveToLocalStorage();
